@@ -1,0 +1,97 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+*.lnk
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Xcode (user-specific data)
+**/*.xcuserstate
+**/*.xcuserdatad
+**/DerivedData/
+
+# Android build outputs
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+
+# iOS build outputs
+/ios/build/
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/ServiceDefinitions.json
+
+# macOS build outputs
+/macos/Build/
+/macos/Pods/
+
+# Linux build outputs
+/linux/build/
+/linux/.cmake/
+/linux/flutter/ephemeral/
+
+# Windows build outputs
+/windows/build/
+/windows/runner/Build/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/coverage/
+
+# Generated code
+*.g.dart
+*.freezed.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Sensitive configuration
+/android/local.properties
+/android/gradle.properties
+*.keystore
+*.jks
+
+# Qoder
+.qoder/
