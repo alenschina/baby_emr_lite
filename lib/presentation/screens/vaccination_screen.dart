@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../providers/vaccination_record_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/forms/vaccination_record_form.dart';
+import '../widgets/adaptive_fab.dart';
 
 /// 疫苗接种屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -110,17 +111,8 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
         ),
       ),
       // 浮动添加按钮
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 80), // 上移避免被底部导航栏遮挡
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppTheme.fabShadow,
-        ),
-        child: FloatingActionButton(
-          onPressed: () => _showAddRecordSheet(context),
-          backgroundColor: AppTheme.brandPrimary,
-          child: const Icon(Icons.add_rounded, color: Colors.white),
-        ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: () => _showAddRecordSheet(context),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -210,6 +202,7 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const VaccinationRecordForm(),
     );
@@ -219,6 +212,7 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => VaccinationRecordForm(existingRecord: record),
     );

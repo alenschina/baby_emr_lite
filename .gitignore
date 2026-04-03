@@ -52,6 +52,7 @@ ehthumbs.db
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Flutter.podspec
 /ios/Flutter/ServiceDefinitions.json
+# Note: Podfile.lock should be committed for reproducible builds
 
 # macOS build outputs
 /macos/Build/
@@ -89,9 +90,14 @@ app.*.map.json
 
 # Sensitive configuration
 /android/local.properties
-/android/gradle.properties
 *.keystore
 *.jks
+
+# Flutter build output (root)
+/build/
+
+# Web build output
+/web/build/
 
 # Qoder
 .qoder/

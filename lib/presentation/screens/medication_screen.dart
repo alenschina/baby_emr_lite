@@ -6,6 +6,7 @@ import '../providers/baby_providers.dart';
 import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/medication_record_form.dart';
+import '../widgets/adaptive_fab.dart';
 
 /// 用药管理屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -91,17 +92,8 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
         ),
       ),
       // 浮动添加按钮
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 80), // 上移避免被底部导航栏遮挡
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppTheme.fabShadow,
-        ),
-        child: FloatingActionButton(
-          onPressed: () => _showAddRecordSheet(context),
-          backgroundColor: AppTheme.brandPrimary,
-          child: const Icon(Icons.add_rounded, color: Colors.white),
-        ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: () => _showAddRecordSheet(context),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -446,6 +438,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const MedicationRecordForm(),
     );
@@ -455,6 +448,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => MedicationRecordForm(existingRecord: record),
     );

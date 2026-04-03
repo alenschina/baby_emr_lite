@@ -5,6 +5,7 @@ import '../providers/growth_data_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/growth_data_form.dart';
+import '../widgets/adaptive_fab.dart';
 
 /// 生长发育屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -109,17 +110,8 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
         ),
       ),
       // 浮动添加按钮
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 80), // 上移避免被底部导航栏遮挡
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppTheme.fabShadow,
-        ),
-        child: FloatingActionButton(
-          onPressed: () => _showAddRecordSheet(context),
-          backgroundColor: AppTheme.brandPrimary,
-          child: const Icon(Icons.add_rounded, color: Colors.white),
-        ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: () => _showAddRecordSheet(context),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -334,6 +326,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const GrowthDataForm(),
     );
@@ -343,6 +336,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => GrowthDataForm(existingRecord: record),
     );

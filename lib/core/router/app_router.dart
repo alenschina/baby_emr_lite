@@ -13,53 +13,59 @@ import '../../presentation/widgets/app_shell.dart';
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-  static GoRouter get router => GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
-    debugLogDiagnostics: true,
-    routes: [
-      // Shell 路由 - 带底部导航
-      ShellRoute(
-        builder: (context, state, child) {
-          return AppShell(currentPath: state.uri.path, child: child);
-        },
-        routes: [
-          GoRoute(
-            path: '/',
-            name: 'home',
-            builder: (context, state) => const HomeScreen(),
-          ),
-          GoRoute(
-            path: '/medical',
-            name: 'medical',
-            builder: (context, state) => const MedicalRecordsScreen(),
-          ),
-          GoRoute(
-            path: '/medication',
-            name: 'medication',
-            builder: (context, state) => const MedicationScreen(),
-          ),
-          GoRoute(
-            path: '/vaccination',
-            name: 'vaccination',
-            builder: (context, state) => const VaccinationScreen(),
-          ),
-          GoRoute(
-            path: '/growth',
-            name: 'growth',
-            builder: (context, state) => const GrowthScreen(),
-          ),
-        ],
-      ),
+  // 单例 GoRouter 实例，避免重复创建
+  static GoRouter? _router;
 
-      // 独立页面 - 不带底部导航
-      GoRoute(
-        path: '/data',
-        name: 'data',
-        builder: (context, state) => const DataManagementScreen(),
-      ),
-    ],
-  );
+  static GoRouter get router {
+    _router ??= GoRouter(
+      navigatorKey: _rootNavigatorKey,
+      initialLocation: '/',
+      debugLogDiagnostics: true,
+      routes: [
+        // Shell 路由 - 带底部导航
+        ShellRoute(
+          builder: (context, state, child) {
+            return AppShell(currentPath: state.uri.path, child: child);
+          },
+          routes: [
+            GoRoute(
+              path: '/',
+              name: 'home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+            GoRoute(
+              path: '/medical',
+              name: 'medical',
+              builder: (context, state) => const MedicalRecordsScreen(),
+            ),
+            GoRoute(
+              path: '/medication',
+              name: 'medication',
+              builder: (context, state) => const MedicationScreen(),
+            ),
+            GoRoute(
+              path: '/vaccination',
+              name: 'vaccination',
+              builder: (context, state) => const VaccinationScreen(),
+            ),
+            GoRoute(
+              path: '/growth',
+              name: 'growth',
+              builder: (context, state) => const GrowthScreen(),
+            ),
+          ],
+        ),
+
+        // 独立页面 - 不带底部导航
+        GoRoute(
+          path: '/data',
+          name: 'data',
+          builder: (context, state) => const DataManagementScreen(),
+        ),
+      ],
+    );
+    return _router!;
+  }
 }
 
 /// 路由名称常量

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/vaccination_record.dart';
 import '../../providers/vaccination_record_providers.dart';
 import '../glass_card.dart';
@@ -51,21 +52,24 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
 
   @override
   Widget build(BuildContext context) {
+    // 获取底部安全区域 + 导航栏高度 + 额外间距
+    final bottomPadding = BottomSheetUtils.getFullBottomPadding(context);
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
         top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 100, // 增加额外间距避免被底部导航栏遮挡
+        bottom: bottomPadding,
       ),
       decoration: BoxDecoration(
         gradient: AppTheme.glassCardGradientHigh,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(color: AppTheme.glassBorder, width: 1),
       ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
