@@ -21,99 +21,136 @@ class DataManagementScreen extends ConsumerWidget {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('管理与备份'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go('/'),
-        ),
-      ),
       body: Container(
         decoration: AppTheme.appBackgroundDecoration,
         child: SafeArea(
-          child: SingleChildScrollView(
+          child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 宝宝管理标题
-                _buildSectionTitle(
-                  icon: Icons.child_care_rounded,
-                  title: '宝宝管理',
-                ),
-                const SizedBox(height: 16),
-
-                // 宝宝列表
-                babiesAsync.when(
-                  data: (babies) {
-                    if (babies.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    return Column(
-                      children: babies.map((baby) {
-                        return BabyListItem(
-                          baby: baby,
-                          onTap: () =>
-                              _showSwitchBabyDialog(context, ref, baby.id),
-                          onDelete: () => _showDeleteConfirm(
-                            context,
-                            ref,
-                            baby.id,
-                            baby.name,
+            slivers: [
+              // 自定义顶部栏
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => context.go('/'),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1,
+                            ),
                           ),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: AppTheme.textPrimary,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        '管理与备份',
+                        style: TextStyle(
+                          fontSize: AppTheme.fontSizePageTitle,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                          fontFamily: AppTheme.fontFamily,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // 内容区域
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: 8),
+                    // 宝宝管理标题
+                    _buildSectionTitle(
+                      icon: Icons.child_care_rounded,
+                      title: '宝宝管理',
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 宝宝列表
+                    babiesAsync.when(
+                      data: (babies) {
+                        if (babies.isEmpty) {
+                          return _buildEmptyState();
+                        }
+                        return Column(
+                          children: babies.map((baby) {
+                            return BabyListItem(
+                              baby: baby,
+                              onTap: () =>
+                                  _showSwitchBabyDialog(context, ref, baby.id),
+                              onDelete: () => _showDeleteConfirm(
+                                context,
+                                ref,
+                                baby.id,
+                                baby.name,
+                              ),
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
-                    );
-                  },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppTheme.brandPrimary,
+                      },
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppTheme.brandPrimary,
+                        ),
+                      ),
+                      error: (error, _) => Center(
+                        child: Text(
+                          '加载失败: $error',
+                          style: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                      ),
                     ),
-                  ),
-                  error: (error, _) => Center(
-                    child: Text(
-                      '加载失败: $error',
-                      style: const TextStyle(color: AppTheme.textSecondary),
+
+                    const SizedBox(height: 24),
+
+                    // 添加新宝宝表单
+                    const AddBabyForm(),
+
+                    const SizedBox(height: 32),
+
+                    // 数据备份与导出
+                    _buildSectionTitle(
+                      icon: Icons.download_rounded,
+                      title: '数据备份与导出',
                     ),
-                  ),
-                ),
+                    const SizedBox(height: 16),
 
-                const SizedBox(height: 24),
+                    _buildBackupSection(context, ref),
 
-                // 添加新宝宝表单
-                const AddBabyForm(),
+                    const SizedBox(height: 16),
 
-                const SizedBox(height: 32),
-
-                // 数据备份与导出
-                _buildSectionTitle(
-                  icon: Icons.download_rounded,
-                  title: '数据备份与导出',
-                ),
-                const SizedBox(height: 16),
-
-                _buildBackupSection(context, ref),
-
-                const SizedBox(height: 16),
-
-                // 提示信息
-                const Center(
-                  child: Text(
-                    '所有数据均已通过 AES-256 加密存储在您的本地设备上，导出文件也包含加密数据。',
-                    style: TextStyle(
-                      fontSize: AppTheme.fontSizeCaption,
-                      color: AppTheme.textTertiary,
-                      fontFamily: AppTheme.fontFamily,
+                    // 提示信息
+                    const Center(
+                      child: Text(
+                        '所有数据均已通过 AES-256 加密存储在您的本地设备上，导出文件也包含加密数据。',
+                        style: TextStyle(
+                          fontSize: AppTheme.fontSizeCaption,
+                          color: AppTheme.textTertiary,
+                          fontFamily: AppTheme.fontFamily,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
 
-                const SizedBox(height: 100), // 底部留白
-              ],
-            ),
+                    const SizedBox(height: 100), // 底部留白
+                  ]),
+                ),
+              ),
+            ],
           ),
         ),
       ),
