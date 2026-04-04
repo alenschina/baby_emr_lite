@@ -85,10 +85,12 @@ class DataManagementScreen extends ConsumerWidget {
                         if (babies.isEmpty) {
                           return _buildEmptyState();
                         }
+                        final currentBabyId = ref.watch(currentBabyIdProvider);
                         return Column(
                           children: babies.map((baby) {
                             return BabyListItem(
                               baby: baby,
+                              isCurrentBaby: baby.id == currentBabyId,
                               onTap: () =>
                                   _showSwitchBabyDialog(context, ref, baby.id),
                               onDelete: () => _showDeleteConfirm(
