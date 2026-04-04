@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/entities/growth_data.dart';
 import '../providers/growth_data_providers.dart';
@@ -72,6 +73,22 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                   ],
                 ),
               ),
+
+              // 趋势图表
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: recordsAsync.when(
+                  data: (records) {
+                    if (records.isEmpty || records.length < 2) {
+                      return const SizedBox.shrink();
+                    }
+                    return _GrowthTrendChart(records: records);
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: 12),
 
               // 记录列表 - 时间轴展示
               Expanded(
@@ -715,5 +732,367 @@ class _TimelineGrowthBar extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}年${date.month}月${date.day}日';
+  }
+}
+
+/// 生长趋势图表组件
+/// 显示身高和体重的双轴折线图，带有动画效果
+/// 使用玻璃拟态设计风格
+/// ignore: must_be_immutable
+class _GrowthTrendChart extends StatefulWidget {
+  final List<GrowthData> records;
+
+  const _GrowthTrendChart({required this.records});
+
+  @override
+  State<_GrowthTrendChart> createState() => _GrowthTrendChartState();
+}
+
+class _GrowthTrendChartState extends State<_GrowthTrendChart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 按日期排序（从旧到新）
+    final sortedRecords = List.of(widget.records)
+      ..sort((a, b) => a.measurementDate.compareTo(b.measurementDate));
+
+    // 计算数据范围
+    final heights = sortedRecords.map((r) => r.height).toList();
+    final weights = sortedRecords.map((r) => r.weight).toList();
+    final minHeight = heights.reduce((a, b) => a < b ? a : b);
+    final maxHeight = heights.reduce((a, b) => a > b ? a : b);
+    final minWeight = weights.reduce((a, b) => a < b ? a : b);
+    final maxWeight = weights.reduce((a, b) => a > b ? a : b);
+
+    // 计算Y轴范围（添加一些边距）
+    final heightMin = (minHeight - 2).floorToDouble();
+    final heightMax = (maxHeight + 2).ceilToDouble();
+    final weightMin = (minWeight - 0.5).floorToDouble();
+    final weightMax = (maxWeight + 0.5).ceilToDouble();
+
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          height: 200,
+          decoration: BoxDecoration(
+            gradient: AppTheme.glassCardGradient,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.glassBorder, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 图表标题
+                Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: AppTheme.brandPrimary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.trending_up_rounded,
+                        size: 16,
+                        color: AppTheme.brandPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '成长趋势',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
+                    ),
+                    const Spacer(),
+                    // 图例
+                    _buildLegend(AppTheme.brandPrimary, '身高'),
+                    const SizedBox(width: 12),
+                    _buildLegend(AppTheme.success, '体重'),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // 图表区域 - 增加左右留白，减小图表宽度
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: LineChart(
+                      _buildLineChartData(
+                        sortedRecords: sortedRecords,
+                        heightMin: heightMin,
+                        heightMax: heightMax,
+                        weightMin: weightMin,
+                        weightMax: weightMax,
+                        progress: _animation.value,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLegend(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 3,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppTheme.textTertiary,
+            fontFamily: AppTheme.fontFamily,
+          ),
+        ),
+      ],
+    );
+  }
+
+  LineChartData _buildLineChartData({
+    required List<GrowthData> sortedRecords,
+    required double heightMin,
+    required double heightMax,
+    required double weightMin,
+    required double weightMax,
+    required double progress,
+  }) {
+    // 生成数据点
+    final heightSpots = <FlSpot>[];
+    final weightSpots = <FlSpot>[];
+
+    for (int i = 0; i < sortedRecords.length; i++) {
+      final record = sortedRecords[i];
+      final x = i.toDouble();
+
+      // 身高数据点（左侧Y轴）
+      heightSpots.add(FlSpot(x, record.height));
+
+      // 体重数据点（右侧Y轴，需要映射到身高轴范围）
+      // 正确映射：将体重值映射到 [heightMin, heightMax] 范围
+      final normalizedWeight =
+          heightMin +
+          (record.weight - weightMin) /
+              (weightMax - weightMin) *
+              (heightMax - heightMin);
+      weightSpots.add(FlSpot(x, normalizedWeight));
+    }
+
+    return LineChartData(
+      lineTouchData: LineTouchData(
+        enabled: true,
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBgColor: Colors.white.withOpacity(0.95),
+          tooltipRoundedRadius: 8,
+          tooltipPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          tooltipMargin: 8,
+          getTooltipItems: (touchedSpots) {
+            return touchedSpots.map((LineBarSpot touchedSpot) {
+              final index = touchedSpot.x.toInt();
+              if (index < 0 || index >= sortedRecords.length) {
+                return null;
+              }
+              final record = sortedRecords[index];
+              final isHeight = touchedSpot.barIndex == 0;
+              return LineTooltipItem(
+                isHeight
+                    ? '${record.height.toStringAsFixed(1)} cm'
+                    : '${record.weight.toStringAsFixed(1)} kg',
+                TextStyle(
+                  color: isHeight ? AppTheme.brandPrimary : AppTheme.success,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  fontFamily: AppTheme.fontFamily,
+                ),
+              );
+            }).toList();
+          },
+        ),
+      ),
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: false,
+        horizontalInterval: 5, // 与Y轴刻度间隔保持一致
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: AppTheme.slate200.withOpacity(0.5),
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: FlTitlesData(
+        show: true,
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 30,
+            interval: 1,
+            getTitlesWidget: (value, meta) {
+              final index = value.toInt();
+              if (index < 0 || index >= sortedRecords.length) {
+                return const SizedBox.shrink();
+              }
+              // 只显示首尾日期
+              if (index == 0 || index == sortedRecords.length - 1) {
+                final date = sortedRecords[index].measurementDate;
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '${date.month}/${date.day}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppTheme.textTertiary,
+                      fontFamily: AppTheme.fontFamily,
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: false, // 隐藏左侧Y轴数值标签
+            reservedSize: 0,
+          ),
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: false, // 隐藏右侧Y轴数值标签
+            reservedSize: 0,
+          ),
+        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      borderData: FlBorderData(show: false),
+      minX: 0,
+      maxX: (sortedRecords.length - 1).toDouble(),
+      minY: heightMin,
+      maxY: heightMax,
+      lineBarsData: [
+        // 身高折线
+        LineChartBarData(
+          spots: heightSpots
+              .map(
+                (spot) => FlSpot(
+                  spot.x,
+                  spot.y * progress + heightMin * (1 - progress),
+                ),
+              )
+              .toList(),
+          isCurved: true,
+          curveSmoothness: 0.3,
+          color: AppTheme.brandPrimary,
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, barData, index) {
+              return FlDotCirclePainter(
+                radius: 4,
+                color: Colors.white,
+                strokeWidth: 2,
+                strokeColor: AppTheme.brandPrimary,
+              );
+            },
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.brandPrimary.withOpacity(0.15),
+                AppTheme.brandPrimary.withOpacity(0.02),
+              ],
+            ),
+          ),
+        ),
+        // 体重折线
+        LineChartBarData(
+          spots: weightSpots
+              .map(
+                (spot) => FlSpot(
+                  spot.x,
+                  spot.y * progress + heightMin * (1 - progress),
+                ),
+              )
+              .toList(),
+          isCurved: true,
+          curveSmoothness: 0.3,
+          color: AppTheme.success,
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, barData, index) {
+              return FlDotCirclePainter(
+                radius: 4,
+                color: Colors.white,
+                strokeWidth: 2,
+                strokeColor: AppTheme.success,
+              );
+            },
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppTheme.success.withOpacity(0.15),
+                AppTheme.success.withOpacity(0.02),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
