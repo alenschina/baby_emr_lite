@@ -53,37 +53,38 @@ class TodayVaccinationReminder {
 /// 今日疫苗提醒 Provider
 /// 获取计划日期为今天且未完成的疫苗接种
 /// 监听疫苗记录变化，自动刷新提醒列表
-final todayVaccinationRemindersProvider = FutureProvider<List<TodayVaccinationReminder>>((
-  ref,
-) async {
-  final currentId = ref.watch(currentBabyIdProvider);
-  if (currentId == null) return [];
+final todayVaccinationRemindersProvider =
+    FutureProvider<List<TodayVaccinationReminder>>((ref) async {
+      final currentId = ref.watch(currentBabyIdProvider);
+      if (currentId == null) return [];
 
-  // 监听疫苗记录变化以触发刷新
-  final _ = ref.watch(vaccinationRecordNotifierProvider);
+      // 监听疫苗记录变化以触发刷新
+      final _ = ref.watch(vaccinationRecordNotifierProvider);
 
-  final repository = ref.watch(vaccinationRecordRepositoryProvider);
-  final pendingRecords = await repository.getPending(currentId);
+      final repository = ref.watch(vaccinationRecordRepositoryProvider);
+      final pendingRecords = await repository.getPending(currentId);
 
-  final today = DateTime.now();
-  final todayDate = DateTime(today.year, today.month, today.day);
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
 
-  return pendingRecords
-      .where((record) {
-        final scheduledDate = DateTime(
-          record.scheduledDate.year,
-          record.scheduledDate.month,
-          record.scheduledDate.day,
-        );
-        return scheduledDate.isAtSameMomentAs(todayDate);
-      })
-      .map((record) => TodayVaccinationReminder(
-            recordId: record.id,
-            vaccineName: record.vaccineName,
-            scheduledDate: record.scheduledDate,
-          ))
-      .toList();
-});
+      return pendingRecords
+          .where((record) {
+            final scheduledDate = DateTime(
+              record.scheduledDate.year,
+              record.scheduledDate.month,
+              record.scheduledDate.day,
+            );
+            return scheduledDate.isAtSameMomentAs(todayDate);
+          })
+          .map(
+            (record) => TodayVaccinationReminder(
+              recordId: record.id,
+              vaccineName: record.vaccineName,
+              scheduledDate: record.scheduledDate,
+            ),
+          )
+          .toList();
+    });
 
 /// 疫苗接种记录操作 Notifier
 /// 能够响应当前宝宝变化并自动刷新数据

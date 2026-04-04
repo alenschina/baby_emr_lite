@@ -61,46 +61,49 @@ class TodayMedicationReminder {
 
 /// 今日用药提醒 Provider
 /// 监听用药记录变化，自动刷新提醒列表
-final todayMedicationRemindersProvider = FutureProvider<List<TodayMedicationReminder>>((
-  ref,
-) async {
-  final currentId = ref.watch(currentBabyIdProvider);
-  if (currentId == null) return [];
+final todayMedicationRemindersProvider =
+    FutureProvider<List<TodayMedicationReminder>>((ref) async {
+      final currentId = ref.watch(currentBabyIdProvider);
+      if (currentId == null) return [];
 
-  // 监听用药记录变化以触发刷新
-  final _ = ref.watch(medicationRecordNotifierProvider);
+      // 监听用药记录变化以触发刷新
+      final _ = ref.watch(medicationRecordNotifierProvider);
 
-  final repository = ref.watch(medicationRecordRepositoryProvider);
-  final statusRepository = ref.watch(medicationStatusRepositoryProvider);
-  final activeMedications = await repository.getActive(currentId);
+      final repository = ref.watch(medicationRecordRepositoryProvider);
+      final statusRepository = ref.watch(medicationStatusRepositoryProvider);
+      final activeMedications = await repository.getActive(currentId);
 
-  final reminders = <TodayMedicationReminder>[];
-  final today = DateTime.now();
-  final todayDate = DateTime(today.year, today.month, today.day);
+      final reminders = <TodayMedicationReminder>[];
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
 
-  for (final medication in activeMedications) {
-    // 检查今天是否已有记录
-    final statuses = await statusRepository.getByMedicationId(medication.id);
-    final hasTodayRecord = statuses.any((s) {
-      final sDate = DateTime(s.date.year, s.date.month, s.date.day);
-      return sDate.isAtSameMomentAs(todayDate);
+      for (final medication in activeMedications) {
+        // 检查今天是否已有记录
+        final statuses = await statusRepository.getByMedicationId(
+          medication.id,
+        );
+        final hasTodayRecord = statuses.any((s) {
+          final sDate = DateTime(s.date.year, s.date.month, s.date.day);
+          return sDate.isAtSameMomentAs(todayDate);
+        });
+
+        // 如果今天没有记录，添加提醒
+        if (!hasTodayRecord) {
+          reminders.add(
+            TodayMedicationReminder(
+              medicationId: medication.id,
+              medicationName: medication.name,
+              dosage: medication.dosage,
+              scheduledTime: medication.scheduledTime ?? '09:00',
+            ),
+          );
+        }
+      }
+
+      // 按时间排序
+      reminders.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+      return reminders;
     });
-
-    // 如果今天没有记录，添加提醒
-    if (!hasTodayRecord) {
-      reminders.add(TodayMedicationReminder(
-        medicationId: medication.id,
-        medicationName: medication.name,
-        dosage: medication.dosage,
-        scheduledTime: medication.scheduledTime ?? '09:00',
-      ));
-    }
-  }
-
-  // 按时间排序
-  reminders.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
-  return reminders;
-});
 
 /// 用药记录操作 Notifier
 /// 能够响应当前宝宝变化并自动刷新数据

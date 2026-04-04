@@ -205,12 +205,11 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                 width: 14,
                 height: 14,
                 decoration: BoxDecoration(
-                  color: isFirst ? AppTheme.brandPrimary : AppTheme.brandPrimary.withOpacity(0.6),
+                  color: isFirst
+                      ? AppTheme.brandPrimary
+                      : AppTheme.brandPrimary.withOpacity(0.6),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 3,
-                  ),
+                  border: Border.all(color: Colors.white, width: 3),
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.brandPrimary.withOpacity(0.3),
@@ -331,7 +330,9 @@ class _TimelineRecordCard extends StatelessWidget {
             : AppTheme.glassCardGradient,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isFirst ? AppTheme.brandPrimary.withOpacity(0.3) : AppTheme.glassBorder,
+          color: isFirst
+              ? AppTheme.brandPrimary.withOpacity(0.3)
+              : AppTheme.glassBorder,
           width: 1,
         ),
         boxShadow: isFirst
@@ -352,7 +353,9 @@ class _TimelineRecordCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: AppTheme.brandPrimary.withOpacity(0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -429,7 +432,10 @@ class _TimelineRecordCard extends StatelessWidget {
 
                 // 诊断结果
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -523,13 +529,13 @@ class _TimelineRecordCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                        record.medications,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.brandPrimary,
-                          fontFamily: AppTheme.fontFamily,
+                          record.medications,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.brandPrimary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
                         ),
-                      ),
                       ),
                     ],
                   ),
