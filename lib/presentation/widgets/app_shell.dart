@@ -22,7 +22,7 @@ class AppShell extends StatelessWidget {
   }
 }
 
-/// 浮动胶囊底部导航栏
+/// 浮动胶囊底部导航栏 - Liquid 风格
 class _FloatingNavBar extends StatelessWidget {
   final String currentPath;
 
@@ -32,28 +32,10 @@ class _FloatingNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.75),
-                Colors.white.withOpacity(0.65),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(AppTheme.radiusNav),
-            border: Border.all(color: AppTheme.glassBorder, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF111827).withOpacity(0.08),
-                blurRadius: 30,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
+          decoration: AppTheme.liquidNavDecoration(),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -118,12 +100,12 @@ class _NavItem extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         constraints: const BoxConstraints(minWidth: 54),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppTheme.brandPrimary.withOpacity(0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: isActive
+            ? AppTheme.liquidNavItemActiveDecoration()
+            : BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

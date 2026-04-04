@@ -141,6 +141,87 @@ class AppTheme {
     ),
   ];
 
+  /// Liquid 风格 FAB 阴影 - 多层柔和流体效果
+  static List<BoxShadow> get liquidFabShadow => [
+    // 主阴影 - 柔和扩散的紫蓝色
+    BoxShadow(
+      color: brandPrimary.withOpacity(0.35),
+      blurRadius: 35,
+      spreadRadius: -5,
+      offset: const Offset(0, 15),
+    ),
+    // 次级阴影 - 粉色光晕
+    BoxShadow(
+      color: const Color(0xFFFF6BBD).withOpacity(0.2),
+      blurRadius: 25,
+      spreadRadius: -3,
+      offset: const Offset(5, 10),
+    ),
+    // 环境光 - 淡蓝色
+    BoxShadow(
+      color: const Color(0xFF6366F1).withOpacity(0.15),
+      blurRadius: 40,
+      spreadRadius: -8,
+      offset: const Offset(-3, 8),
+    ),
+  ];
+
+  /// Liquid 风格 FAB 渐变
+  static LinearGradient get liquidFabGradient => const LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF7B6BFF), // 浅紫蓝
+      Color(0xFF6B5CE7), // 主紫蓝
+      Color(0xFF5B4CD7), // 深紫蓝
+    ],
+    stops: [0.0, 0.5, 1.0],
+  );
+
+  /// Liquid 风格 FAB 装饰 - 参考玻璃拟态图标容器设计
+  /// 径向渐变背景 + 柔和阴影 + 细腻边框
+  static BoxDecoration liquidFabDecoration({Color? gradientColor}) =>
+      BoxDecoration(
+        // Liquid 风格径向渐变背景
+        gradient: RadialGradient(
+          center: Alignment.topLeft,
+          radius: 1.3,
+          colors: [
+            const Color(0xFF8B7BFF).withOpacity(0.98), // 亮紫蓝高光
+            (gradientColor ?? brandPrimary).withOpacity(0.95), // 主色
+            const Color(0xFF5B4CD7).withOpacity(0.9), // 深紫蓝
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        // 细腻的内发光边框
+        border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+        // Liquid 风格多层柔和阴影
+        boxShadow: [
+          // 主阴影 - 柔和扩散的紫蓝色
+          BoxShadow(
+            color: (gradientColor ?? brandPrimary).withOpacity(0.35),
+            blurRadius: 30,
+            spreadRadius: -5,
+            offset: const Offset(0, 12),
+          ),
+          // 次级阴影 - 粉色光晕
+          BoxShadow(
+            color: const Color(0xFFFF6BBD).withOpacity(0.18),
+            blurRadius: 20,
+            spreadRadius: -3,
+            offset: const Offset(4, 8),
+          ),
+          // 顶部高光效果
+          BoxShadow(
+            color: Colors.white.withOpacity(0.5),
+            blurRadius: 0,
+            spreadRadius: 1,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      );
+
   /// 按钮阴影：shadow-[0_18px_45px_rgba(91,90,246,0.35)]
   static List<BoxShadow> get buttonShadow => [
     BoxShadow(
@@ -273,6 +354,62 @@ class AppTheme {
       offset: const Offset(10, 10),
     ),
   ];
+
+  /// Liquid 风格底部导航栏装饰
+  static BoxDecoration liquidNavDecoration() => BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white.withOpacity(0.85),
+        Colors.white.withOpacity(0.75),
+        const Color(0xFFF8F5FF).withOpacity(0.7),
+        const Color(0xFFFFF5FC).withOpacity(0.65),
+      ],
+      stops: const [0.0, 0.4, 0.7, 1.0],
+    ),
+    borderRadius: BorderRadius.circular(radiusNav),
+    border: Border.all(color: Colors.white.withOpacity(0.85), width: 1.5),
+    boxShadow: [
+      // 主阴影
+      BoxShadow(
+        color: brandPrimary.withOpacity(0.08),
+        blurRadius: 35,
+        spreadRadius: -5,
+        offset: const Offset(0, 12),
+      ),
+      // 顶部高光
+      BoxShadow(
+        color: Colors.white.withOpacity(0.9),
+        blurRadius: 0,
+        spreadRadius: 1,
+        offset: const Offset(0, -1),
+      ),
+      // 粉色环境光
+      BoxShadow(
+        color: const Color(0xFFFF6BBD).withOpacity(0.05),
+        blurRadius: 20,
+        spreadRadius: -3,
+        offset: const Offset(8, 8),
+      ),
+    ],
+  );
+
+  /// Liquid 风格导航项选中状态装饰
+  static BoxDecoration liquidNavItemActiveDecoration() => BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        brandPrimary.withOpacity(0.15),
+        brandPrimary.withOpacity(0.1),
+        const Color(0xFF6366F1).withOpacity(0.08),
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    ),
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: brandPrimary.withOpacity(0.1), width: 1),
+  );
 
   // ==================== 主题数据 ====================
   /// 浅色主题
