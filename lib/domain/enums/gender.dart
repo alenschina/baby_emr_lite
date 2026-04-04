@@ -10,8 +10,8 @@ enum Gender {
   };
 
   String get shortLabel => switch (this) {
-    Gender.male => '王子',
-    Gender.female => '公主',
+    Gender.male => '小王子',
+    Gender.female => '小公主',
   };
 
   /// 默认头像路径

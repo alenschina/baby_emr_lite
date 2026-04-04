@@ -74,7 +74,7 @@ class BabyWelcomeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${baby.gender.label} · ${_formatDate(baby.birthDate)}',
+                  baby.birthDate.toString().split(' ')[0],
                   style: const TextStyle(
                     fontSize: AppTheme.fontSizeBody,
                     fontWeight: FontWeight.w400,

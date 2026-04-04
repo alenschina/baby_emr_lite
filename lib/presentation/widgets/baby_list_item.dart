@@ -68,7 +68,7 @@ class BabyListItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${baby.gender.label} · ${baby.birthDate.toString().split(' ')[0]}',
+                  baby.birthDate.toString().split(' ')[0],
                   style: TextStyle(fontSize: 13, color: AppTheme.slate500),
                 ),
               ],
