@@ -350,11 +350,6 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
               ? _notesController.text.trim()
               : null,
         );
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('生长记录已更新')));
-        }
       } else {
         await notifier.create(
           measurementDate: _selectedDate,
@@ -364,15 +359,22 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
               ? _notesController.text.trim()
               : null,
         );
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('生长记录添加成功')));
-        }
       }
 
+      // 先校验 mounted，再获取 messenger 并关闭 bottom sheet，避免在 pop 后继续使用已失效 context
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      final navigator = Navigator.maybeOf(context);
+
       widget.onSuccess?.call();
-      if (mounted) Navigator.pop(context);
+      messenger?.showSnackBar(
+        SnackBar(content: Text(isEditing ? '生长记录已更新' : '生长记录添加成功')),
+      );
+
+      // 延迟到下一帧关闭，避免与当前导航栈变更冲突导致 Navigator lock
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigator?.maybePop();
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

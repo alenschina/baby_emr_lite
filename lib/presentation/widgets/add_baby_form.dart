@@ -230,10 +230,8 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
         });
 
         if (mounted) {
-          Navigator.pop(context); // 关闭表单返回首页
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('宝宝添加成功')));
+          final messenger = ScaffoldMessenger.maybeOf(context);
+          messenger?.showSnackBar(const SnackBar(content: Text('宝宝添加成功')));
         }
       } catch (e) {
         if (mounted) {

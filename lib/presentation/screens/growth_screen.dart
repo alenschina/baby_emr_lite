@@ -53,6 +53,22 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // 趋势图表
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: recordsAsync.when(
+                      data: (records) {
+                        if (records.isEmpty || records.length < 2) {
+                          return const SizedBox.shrink();
+                        }
+                        return _GrowthTrendChart(records: records);
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   // 历史记录标题
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -76,22 +92,6 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                       ],
                     ),
                   ),
-
-                  // 趋势图表
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: recordsAsync.when(
-                      data: (records) {
-                        if (records.isEmpty || records.length < 2) {
-                          return const SizedBox.shrink();
-                        }
-                        return _GrowthTrendChart(records: records);
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
 
                   // 记录列表 - 时间轴展示
                   Expanded(
@@ -188,7 +188,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
 
   Widget _buildHealthCard(latest) {
     return GlassCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -199,23 +199,23 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
               Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: 28,
+                    height: 28,
                     decoration: BoxDecoration(
                       color: AppTheme.brandPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.favorite_rounded,
-                      size: 18,
+                      size: 16,
                       color: AppTheme.brandPrimary,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Text(
                     '我的健康',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                       fontFamily: AppTheme.fontFamily,
@@ -226,14 +226,14 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
               Text(
                 '· 更新于 ${_formatTime(latest.measurementDate)}',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: AppTheme.textTertiary,
                   fontFamily: AppTheme.fontFamily,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 健康指标
           Row(
@@ -247,7 +247,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                   color: AppTheme.brandPrimary,
                 ),
               ),
-              Container(width: 1, height: 40, color: AppTheme.slate200),
+              Container(width: 1, height: 32, color: AppTheme.slate200),
               Expanded(
                 child: _buildMetricItem(
                   icon: Icons.monitor_weight_rounded,
@@ -280,7 +280,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
             Text(
               value,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
                 fontFamily: AppTheme.fontFamily,
@@ -288,11 +288,11 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
             ),
             const SizedBox(width: 2),
             Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 3),
               child: Text(
                 unit,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: AppTheme.textSecondary,
                   fontFamily: AppTheme.fontFamily,
                 ),
@@ -300,16 +300,16 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 3),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: AppTheme.textSecondary,
                 fontFamily: AppTheme.fontFamily,
               ),
@@ -801,14 +801,14 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
       animation: _animation,
       builder: (context, child) {
         return Container(
-          height: 200,
+          height: 160,
           decoration: BoxDecoration(
             gradient: AppTheme.glassCardGradient,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppTheme.glassBorder, width: 1),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -816,23 +816,23 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
                 Row(
                   children: [
                     Container(
-                      width: 28,
-                      height: 28,
+                      width: 24,
+                      height: 24,
                       decoration: BoxDecoration(
                         color: AppTheme.brandPrimary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(
                         Icons.trending_up_rounded,
-                        size: 16,
+                        size: 14,
                         color: AppTheme.brandPrimary,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
                       '成长趋势',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                         fontFamily: AppTheme.fontFamily,
@@ -841,15 +841,15 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
                     const Spacer(),
                     // 图例
                     _buildLegend(AppTheme.brandPrimary, '身高'),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     _buildLegend(AppTheme.success, '体重'),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 // 图表区域 - 增加左右留白，减小图表宽度
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: LineChart(
                       _buildLineChartData(
                         sortedRecords: sortedRecords,
