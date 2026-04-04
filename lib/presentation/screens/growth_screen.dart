@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../domain/entities/growth_data.dart';
 import '../providers/growth_data_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/glass_card.dart';
@@ -48,7 +49,31 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 记录列表
+              // 历史记录标题
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.history_rounded,
+                      size: 18,
+                      color: AppTheme.textTertiary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '历史记录',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textTertiary,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 记录列表 - 时间轴展示
               Expanded(
                 child: recordsAsync.when(
                   data: (records) {
@@ -63,22 +88,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                             b.measurementDate.compareTo(a.measurementDate),
                       );
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                      itemCount: sortedRecords.length,
-                      itemBuilder: (context, index) {
-                        final record = sortedRecords[index];
-                        final previousRecord = index < sortedRecords.length - 1
-                            ? sortedRecords[index + 1]
-                            : null;
-                        return GrowthDataCard(
-                          record: record,
-                          previousRecord: previousRecord,
-                          onEdit: () => _showEditRecordSheet(context, record),
-                          onDelete: () => _confirmDelete(context, record.id),
-                        );
-                      },
-                    );
+                    return _buildTimeline(sortedRecords);
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
@@ -322,6 +332,105 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     );
   }
 
+  /// 构建时间轴展示
+  Widget _buildTimeline(List<GrowthData> records) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      itemCount: records.length,
+      itemBuilder: (context, index) {
+        final record = records[index];
+        final isFirst = index == 0;
+        final isLast = index == records.length - 1;
+        final previousRecord = index < records.length - 1
+            ? records[index + 1]
+            : null;
+
+        return _buildTimelineItem(
+          record: record,
+          previousRecord: previousRecord,
+          isFirst: isFirst,
+          isLast: isLast,
+          onEdit: () => _showEditRecordSheet(context, record),
+          onDelete: () => _confirmDelete(context, record.id),
+        );
+      },
+    );
+  }
+
+  /// 构建时间轴单个节点
+  Widget _buildTimelineItem({
+    required GrowthData record,
+    required GrowthData? previousRecord,
+    required bool isFirst,
+    required bool isLast,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    // 计算差异
+    double? heightDiff;
+    double? weightDiff;
+    if (previousRecord != null) {
+      heightDiff = record.height - previousRecord.height;
+      weightDiff = record.weight - previousRecord.weight;
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 左侧时间轴
+        SizedBox(
+          width: 44,
+          child: Column(
+            children: [
+              // 时间轴节点
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: isFirst
+                      ? AppTheme.brandPrimary
+                      : AppTheme.brandPrimary.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+              ),
+              // 连接线
+              if (!isLast)
+                Container(
+                  width: 1.5,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppTheme.brandPrimary.withOpacity(0.3),
+                        AppTheme.brandPrimary.withOpacity(0.08),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // 右侧细长条形卡片
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _TimelineGrowthBar(
+              record: record,
+              heightDiff: heightDiff,
+              weightDiff: weightDiff,
+              isFirst: isFirst,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showAddRecordSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -332,7 +441,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     );
   }
 
-  void _showEditRecordSheet(BuildContext context, record) {
+  void _showEditRecordSheet(BuildContext context, GrowthData record) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -372,5 +481,239 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
         ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
       }
     }
+  }
+}
+
+/// 细长条形时间轴生长记录组件
+class _TimelineGrowthBar extends StatelessWidget {
+  final GrowthData record;
+  final double? heightDiff;
+  final double? weightDiff;
+  final bool isFirst;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  const _TimelineGrowthBar({
+    required this.record,
+    this.heightDiff,
+    this.weightDiff,
+    this.isFirst = false,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isFirst
+            ? AppTheme.glassCardGradientHigh
+            : AppTheme.glassCardGradient,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isFirst
+              ? AppTheme.brandPrimary.withOpacity(0.25)
+              : AppTheme.glassBorder,
+          width: 1,
+        ),
+        boxShadow: isFirst
+            ? [
+                BoxShadow(
+                  color: AppTheme.brandPrimary.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 第一行：日期
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 12,
+                  color: isFirst
+                      ? AppTheme.brandPrimary
+                      : AppTheme.textTertiary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _formatDate(record.measurementDate),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isFirst
+                        ? AppTheme.brandPrimary
+                        : AppTheme.textSecondary,
+                    fontFamily: AppTheme.fontFamily,
+                  ),
+                ),
+                const Spacer(),
+                // 操作按钮
+                if (onEdit != null)
+                  GestureDetector(
+                    onTap: onEdit,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 14,
+                        color: AppTheme.textTertiary,
+                      ),
+                    ),
+                  ),
+                if (onDelete != null)
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: Icon(
+                      Icons.delete_outline,
+                      size: 14,
+                      color: AppTheme.error.withOpacity(0.7),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // 第二行：数据
+            Row(
+              children: [
+                // 身高数据
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.brandPrimary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.height_rounded,
+                          size: 14,
+                          color: AppTheme.brandPrimary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          record.height.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          'cm',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.textTertiary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
+                        if (heightDiff != null && heightDiff != 0) ...[
+                          const SizedBox(width: 6),
+                          _buildDiffBadge(heightDiff!, AppTheme.brandPrimary),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // 体重数据
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.success.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.monitor_weight_rounded,
+                          size: 14,
+                          color: AppTheme.success,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          record.weight.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          'kg',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.textTertiary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
+                        if (weightDiff != null && weightDiff != 0) ...[
+                          const SizedBox(width: 6),
+                          _buildDiffBadge(weightDiff!, AppTheme.success),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiffBadge(double diff, Color baseColor) {
+    final isPositive = diff > 0;
+    final color = isPositive ? AppTheme.success : AppTheme.error;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+            size: 10,
+            color: color,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            diff.abs().toStringAsFixed(1),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+              fontFamily: AppTheme.fontFamily,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}年${date.month}月${date.day}日';
   }
 }
