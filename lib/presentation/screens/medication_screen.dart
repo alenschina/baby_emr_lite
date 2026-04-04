@@ -43,59 +43,63 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: AppTheme.appBackgroundDecoration,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // 顶部标题栏
-              _buildHeader(currentBabyAsync),
+        child: Stack(
+          children: [
+            // 主要内容
+            SafeArea(
+              child: Column(
+                children: [
+                  // 顶部标题栏
+                  _buildHeader(currentBabyAsync),
 
-              // Tab 栏
-              MedicationTabBar(controller: _tabController),
+                  // Tab 栏
+                  MedicationTabBar(controller: _tabController),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // Tab 内容
-              Expanded(
-                child: recordsAsync.when(
-                  data: (records) {
-                    final activeRecords = records
-                        .where((r) => r.isActive)
-                        .toList();
-                    final inactiveRecords = records
-                        .where((r) => !r.isActive)
-                        .toList();
+                  // Tab 内容
+                  Expanded(
+                    child: recordsAsync.when(
+                      data: (records) {
+                        final activeRecords = records
+                            .where((r) => r.isActive)
+                            .toList();
+                        final inactiveRecords = records
+                            .where((r) => !r.isActive)
+                            .toList();
 
-                    return TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // 当前用药
-                        _buildCurrentMedications(activeRecords),
-                        // 用药历史
-                        _buildHistoryMedications(inactiveRecords),
-                        // 依从性统计
-                        _buildComplianceStats(activeRecords),
-                      ],
-                    );
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Text(
-                      '加载失败: $error',
-                      style: TextStyle(color: AppTheme.error),
+                        return TabBarView(
+                          controller: _tabController,
+                          children: [
+                            // 当前用药
+                            _buildCurrentMedications(activeRecords),
+                            // 用药历史
+                            _buildHistoryMedications(inactiveRecords),
+                            // 依从性统计
+                            _buildComplianceStats(activeRecords),
+                          ],
+                        );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Center(
+                        child: Text(
+                          '加载失败: $error',
+                          style: TextStyle(color: AppTheme.error),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // 右上角添加按钮
+            AdaptiveFloatingActionButton(
+              onPressed: () => _showAddRecordSheet(context),
+            ),
+          ],
         ),
       ),
-      // 浮动添加按钮
-      floatingActionButton: AdaptiveFloatingActionButton(
-        onPressed: () => _showAddRecordSheet(context),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -155,7 +159,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '点击右上角按钮添加用药计划',
+              '点击右上角按钮添加记录',
               style: TextStyle(
                 fontSize: AppTheme.fontSizeCaption,
                 color: AppTheme.textTertiary,
@@ -168,7 +172,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];
@@ -204,7 +208,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];

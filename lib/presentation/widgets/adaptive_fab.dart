@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/bottom_sheet_utils.dart';
 
 /// Liquid 风格浮动添加按钮
 ///
 /// 参考首页设置按钮的玻璃拟态设计风格
 /// 采用径向渐变背景、多层柔和阴影和细腻边框，呈现流体感的视觉效果
-/// 自动计算底部边距，确保按钮不会被底部导航栏遮挡
+/// 定位在右上角，尺寸与页面标题字体大小（24px）协调
 class AdaptiveFloatingActionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
@@ -23,30 +22,34 @@ class AdaptiveFloatingActionButton extends StatelessWidget {
     this.gradientColor,
     this.iconColor,
     this.tooltip,
-    this.extraSpacing = 36.0, // FAB 与底部导航栏之间的间距（增大以避免重叠）
-    this.size = 56.0, // FAB 默认尺寸
+    this.extraSpacing = 16.0, // FAB 与顶部边缘之间的间距
+    this.size = 40.0, // FAB 尺寸调整为 40px，与 24px 标题字体视觉协调
   });
 
   @override
   Widget build(BuildContext context) {
-    final bottomMargin = BottomSheetUtils.getFabBottomMargin(
-      context,
-      extraSpacing: extraSpacing,
-    );
-
-    return Container(
-      margin: EdgeInsets.only(bottom: bottomMargin),
-      child: GestureDetector(
-        onTap: onPressed,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: AppTheme.liquidFabDecoration(gradientColor: gradientColor),
-          child: Icon(
-            icon,
-            color: iconColor ?? Colors.white,
-            size: 28,
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: extraSpacing,
+            right: extraSpacing,
+          ),
+          child: GestureDetector(
+            onTap: onPressed,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: size,
+              height: size,
+              decoration: AppTheme.liquidFabDecoration(gradientColor: gradientColor),
+              child: Icon(
+                icon,
+                color: iconColor ?? Colors.white,
+                size: 20, // 图标尺寸调整为 20px，与按钮尺寸协调
+              ),
+            ),
           ),
         ),
       ),

@@ -30,117 +30,121 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: AppTheme.appBackgroundDecoration,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // 顶部标题栏
-              _buildHeader(currentBabyAsync),
+        child: Stack(
+          children: [
+            // 主要内容
+            SafeArea(
+              child: Column(
+                children: [
+                  // 顶部标题栏
+                  _buildHeader(currentBabyAsync),
 
-              // 最新数据统计卡片
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: latestDataAsync.when(
-                  data: (latest) {
-                    if (latest == null) return const SizedBox.shrink();
-                    return _buildHealthCard(latest);
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // 历史记录标题
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.history_rounded,
-                      size: 18,
-                      color: AppTheme.textTertiary,
+                  // 最新数据统计卡片
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: latestDataAsync.when(
+                      data: (latest) {
+                        if (latest == null) return const SizedBox.shrink();
+                        return _buildHealthCard(latest);
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '历史记录',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textTertiary,
-                        fontFamily: AppTheme.fontFamily,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                  const SizedBox(height: 16),
 
-              // 趋势图表
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: recordsAsync.when(
-                  data: (records) {
-                    if (records.isEmpty || records.length < 2) {
-                      return const SizedBox.shrink();
-                    }
-                    return _GrowthTrendChart(records: records);
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 记录列表 - 时间轴展示
-              Expanded(
-                child: recordsAsync.when(
-                  data: (records) {
-                    if (records.isEmpty) {
-                      return _buildEmptyState();
-                    }
-
-                    // 按日期排序（最新在前）
-                    final sortedRecords = List.of(records)
-                      ..sort(
-                        (a, b) =>
-                            b.measurementDate.compareTo(a.measurementDate),
-                      );
-
-                    return _buildTimeline(sortedRecords);
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  // 历史记录标题
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                    child: Row(
                       children: [
                         Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: AppTheme.error,
+                          Icons.history_rounded,
+                          size: 18,
+                          color: AppTheme.textTertiary,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(width: 8),
                         Text(
-                          '加载失败',
+                          '历史记录',
                           style: TextStyle(
-                            fontSize: AppTheme.fontSizeBody,
-                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textTertiary,
                             fontFamily: AppTheme.fontFamily,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
+
+                  // 趋势图表
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: recordsAsync.when(
+                      data: (records) {
+                        if (records.isEmpty || records.length < 2) {
+                          return const SizedBox.shrink();
+                        }
+                        return _GrowthTrendChart(records: records);
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 记录列表 - 时间轴展示
+                  Expanded(
+                    child: recordsAsync.when(
+                      data: (records) {
+                        if (records.isEmpty) {
+                          return _buildEmptyState();
+                        }
+
+                        // 按日期排序（最新在前）
+                        final sortedRecords = List.of(records)
+                          ..sort(
+                            (a, b) =>
+                                b.measurementDate.compareTo(a.measurementDate),
+                          );
+
+                        return _buildTimeline(sortedRecords);
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: AppTheme.error,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '加载失败',
+                              style: TextStyle(
+                                fontSize: AppTheme.fontSizeBody,
+                                color: AppTheme.textSecondary,
+                                fontFamily: AppTheme.fontFamily,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // 右上角添加按钮
+            AdaptiveFloatingActionButton(
+              onPressed: () => _showAddRecordSheet(context),
+            ),
+          ],
         ),
       ),
-      // 浮动添加按钮
-      floatingActionButton: AdaptiveFloatingActionButton(
-        onPressed: () => _showAddRecordSheet(context),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -337,7 +341,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '点击右上角按钮记录身高体重',
+            '点击右上角按钮添加记录',
             style: TextStyle(
               fontSize: AppTheme.fontSizeCaption,
               color: AppTheme.textTertiary,
@@ -352,7 +356,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
   /// 构建时间轴展示
   Widget _buildTimeline(List<GrowthData> records) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];

@@ -28,67 +28,71 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: AppTheme.appBackgroundDecoration,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // 顶部标题栏
-              _buildHeader(currentBabyAsync),
+        child: Stack(
+          children: [
+            // 主要内容
+            SafeArea(
+              child: Column(
+                children: [
+                  // 顶部标题栏
+                  _buildHeader(currentBabyAsync),
 
-              // 记录列表 - 时间轴展示
-              Expanded(
-                child: recordsAsync.when(
-                  data: (records) {
-                    if (records.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    // 按时间倒序排列（最新的在最上方）
-                    final sortedRecords = List.of(records)
-                      ..sort((a, b) => b.visitDate.compareTo(a.visitDate));
-                    return _buildTimeline(sortedRecords);
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: AppTheme.error,
+                  // 记录列表 - 时间轴展示
+                  Expanded(
+                    child: recordsAsync.when(
+                      data: (records) {
+                        if (records.isEmpty) {
+                          return _buildEmptyState();
+                        }
+                        // 按时间倒序排列（最新的在最上方）
+                        final sortedRecords = List.of(records)
+                          ..sort((a, b) => b.visitDate.compareTo(a.visitDate));
+                        return _buildTimeline(sortedRecords);
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: AppTheme.error,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '加载失败',
+                              style: TextStyle(
+                                fontSize: AppTheme.fontSizeBody,
+                                color: AppTheme.textSecondary,
+                                fontFamily: AppTheme.fontFamily,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error.toString(),
+                              style: TextStyle(
+                                fontSize: AppTheme.fontSizeCaption,
+                                color: AppTheme.textTertiary,
+                                fontFamily: AppTheme.fontFamily,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '加载失败',
-                          style: TextStyle(
-                            fontSize: AppTheme.fontSizeBody,
-                            color: AppTheme.textSecondary,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          error.toString(),
-                          style: TextStyle(
-                            fontSize: AppTheme.fontSizeCaption,
-                            color: AppTheme.textTertiary,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // 右上角添加按钮
+            AdaptiveFloatingActionButton(
+              onPressed: () => _showAddRecordSheet(context),
+            ),
+          ],
         ),
       ),
-      // 浮动添加按钮
-      floatingActionButton: AdaptiveFloatingActionButton(
-        onPressed: () => _showAddRecordSheet(context),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -151,7 +155,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '点击右上角按钮添加就诊记录',
+            '点击右上角按钮添加记录',
             style: TextStyle(
               fontSize: AppTheme.fontSizeCaption,
               color: AppTheme.textTertiary,
@@ -166,7 +170,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
   /// 构建时间轴展示
   Widget _buildTimeline(List<MedicalRecord> records) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];

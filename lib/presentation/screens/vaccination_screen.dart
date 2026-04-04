@@ -41,80 +41,84 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: AppTheme.appBackgroundDecoration,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // 顶部标题栏
-              _buildHeader(currentBabyAsync),
+        child: Stack(
+          children: [
+            // 主要内容
+            SafeArea(
+              child: Column(
+                children: [
+                  // 顶部标题栏
+                  _buildHeader(currentBabyAsync),
 
-              // Tab 栏
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    gradient: AppTheme.primaryButtonGradient,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppTheme.textSecondary,
-                  labelStyle: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: AppTheme.fontFamily,
-                  ),
-                  tabs: const [
-                    Tab(text: '待接种'),
-                    Tab(text: '已完成'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Tab 内容
-              Expanded(
-                child: recordsAsync.when(
-                  data: (records) {
-                    final pendingRecords = records
-                        .where((r) => !r.isCompleted)
-                        .toList();
-                    final completedRecords = records
-                        .where((r) => r.isCompleted)
-                        .toList();
-
-                    return TabBarView(
+                  // Tab 栏
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TabBar(
                       controller: _tabController,
-                      children: [
-                        _buildRecordList(pendingRecords, isPending: true),
-                        _buildRecordList(completedRecords, isPending: false),
+                      indicator: BoxDecoration(
+                        gradient: AppTheme.primaryButtonGradient,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: AppTheme.textSecondary,
+                      labelStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
+                      tabs: const [
+                        Tab(text: '待接种'),
+                        Tab(text: '已完成'),
                       ],
-                    );
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => Center(
-                    child: Text(
-                      '加载失败: $error',
-                      style: TextStyle(color: AppTheme.error),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+
+                  // Tab 内容
+                  Expanded(
+                    child: recordsAsync.when(
+                      data: (records) {
+                        final pendingRecords = records
+                            .where((r) => !r.isCompleted)
+                            .toList();
+                        final completedRecords = records
+                            .where((r) => r.isCompleted)
+                            .toList();
+
+                        return TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildRecordList(pendingRecords, isPending: true),
+                            _buildRecordList(completedRecords, isPending: false),
+                          ],
+                        );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Center(
+                        child: Text(
+                          '加载失败: $error',
+                          style: TextStyle(color: AppTheme.error),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // 右上角添加按钮
+            AdaptiveFloatingActionButton(
+              onPressed: () => _showAddRecordSheet(context),
+            ),
+          ],
         ),
       ),
-      // 浮动添加按钮
-      floatingActionButton: AdaptiveFloatingActionButton(
-        onPressed: () => _showAddRecordSheet(context),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -176,13 +180,22 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
                 fontFamily: AppTheme.fontFamily,
               ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              '点击右上角按钮添加记录',
+              style: TextStyle(
+                fontSize: AppTheme.fontSizeCaption,
+                color: AppTheme.textTertiary,
+                fontFamily: AppTheme.fontFamily,
+              ),
+            ),
           ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];
