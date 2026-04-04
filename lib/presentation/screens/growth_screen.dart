@@ -849,7 +849,7 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
                 // 图表区域 - 增加左右留白，减小图表宽度
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: LineChart(
                       _buildLineChartData(
                         sortedRecords: sortedRecords,
