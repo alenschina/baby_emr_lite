@@ -19,32 +19,41 @@ class BabyWelcomeCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppTheme.cardPaddingLarge),
       child: Row(
         children: [
-          // 头像 - 玻璃拟态图标容器
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isMale
-                    ? [
-                        const Color(0xFF3B82F6).withOpacity(0.15),
-                        const Color(0xFF6366F1).withOpacity(0.1),
-                      ]
-                    : [
-                        const Color(0xFFEC4899).withOpacity(0.15),
-                        const Color(0xFFF43F5E).withOpacity(0.1),
-                      ],
-              ),
-              borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
-              border: Border.all(color: AppTheme.glassBorder, width: 1),
-            ),
-            child: Center(
-              child: Text(
-                baby.avatarPath ?? '👶',
-                style: const TextStyle(fontSize: 32),
-              ),
+          // 头像 - 圆角图片
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
+            child: Image.asset(
+              baby.avatarPath ?? baby.gender.defaultAvatarPath,
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isMale
+                          ? [
+                              const Color(0xFF3B82F6).withOpacity(0.15),
+                              const Color(0xFF6366F1).withOpacity(0.1),
+                            ]
+                          : [
+                              const Color(0xFFEC4899).withOpacity(0.15),
+                              const Color(0xFFF43F5E).withOpacity(0.1),
+                            ],
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.radiusIconContainer,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text('👶', style: TextStyle(fontSize: 32)),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: 16),

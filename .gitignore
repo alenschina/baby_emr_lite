@@ -54,19 +54,6 @@ ehthumbs.db
 /ios/Flutter/ServiceDefinitions.json
 # Note: Podfile.lock should be committed for reproducible builds
 
-# macOS build outputs
-/macos/Build/
-/macos/Pods/
-
-# Linux build outputs
-/linux/build/
-/linux/.cmake/
-/linux/flutter/ephemeral/
-
-# Windows build outputs
-/windows/build/
-/windows/runner/Build/
-
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id

@@ -28,16 +28,27 @@ class BabyListItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 头像
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppTheme.slate100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Text('👶', style: const TextStyle(fontSize: 24)),
+          // 头像 - 圆角图片
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              baby.avatarPath ?? baby.gender.defaultAvatarPath,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppTheme.slate100,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: Text('👶', style: TextStyle(fontSize: 24)),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: 16),
