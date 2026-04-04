@@ -14,8 +14,12 @@ class TodayRemindersSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final medicationRemindersAsync = ref.watch(todayMedicationRemindersProvider);
-    final vaccinationRemindersAsync = ref.watch(todayVaccinationRemindersProvider);
+    final medicationRemindersAsync = ref.watch(
+      todayMedicationRemindersProvider,
+    );
+    final vaccinationRemindersAsync = ref.watch(
+      todayVaccinationRemindersProvider,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,18 +37,18 @@ class TodayRemindersSection extends ConsumerWidget {
                 fontFamily: AppTheme.fontFamily,
               ),
             ),
-            GestureDetector(
-              onTap: () => context.go('/medication'),
-              child: const Text(
-                '查看全部',
-                style: TextStyle(
-                  fontSize: AppTheme.fontSizeCaption,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.brandPrimary,
-                  fontFamily: AppTheme.fontFamily,
-                ),
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: () => context.go('/medication'),
+            //   child: const Text(
+            //     '查看全部',
+            //     style: TextStyle(
+            //       fontSize: AppTheme.fontSizeCaption,
+            //       fontWeight: FontWeight.w500,
+            //       color: AppTheme.brandPrimary,
+            //       fontFamily: AppTheme.fontFamily,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         const SizedBox(height: 16),
@@ -54,7 +58,8 @@ class TodayRemindersSection extends ConsumerWidget {
           data: (medicationReminders) {
             return vaccinationRemindersAsync.when(
               data: (vaccinationReminders) {
-                final totalReminders = medicationReminders.length + vaccinationReminders.length;
+                final totalReminders =
+                    medicationReminders.length + vaccinationReminders.length;
 
                 if (totalReminders == 0) {
                   return _buildEmptyState();
@@ -63,18 +68,22 @@ class TodayRemindersSection extends ConsumerWidget {
                 return Column(
                   children: [
                     // 用药提醒
-                    ...medicationReminders.map((reminder) => _buildMedicationReminderItem(
-                      context,
-                      reminder,
-                      () => context.go('/medication'),
-                    )),
+                    ...medicationReminders.map(
+                      (reminder) => _buildMedicationReminderItem(
+                        context,
+                        reminder,
+                        () => context.go('/medication'),
+                      ),
+                    ),
 
                     // 疫苗提醒
-                    ...vaccinationReminders.map((reminder) => _buildVaccinationReminderItem(
-                      context,
-                      reminder,
-                      () => context.go('/vaccination'),
-                    )),
+                    ...vaccinationReminders.map(
+                      (reminder) => _buildVaccinationReminderItem(
+                        context,
+                        reminder,
+                        () => context.go('/vaccination'),
+                      ),
+                    ),
                   ],
                 );
               },
@@ -117,7 +126,9 @@ class TodayRemindersSection extends ConsumerWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: AppTheme.brandPrimary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
+                borderRadius: BorderRadius.circular(
+                  AppTheme.radiusIconContainer,
+                ),
               ),
               child: const Icon(
                 Icons.medication_rounded,
@@ -180,7 +191,9 @@ class TodayRemindersSection extends ConsumerWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: AppTheme.warning.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
+                borderRadius: BorderRadius.circular(
+                  AppTheme.radiusIconContainer,
+                ),
               ),
               child: const Icon(
                 Icons.vaccines_rounded,

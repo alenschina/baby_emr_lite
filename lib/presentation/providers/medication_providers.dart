@@ -60,11 +60,15 @@ class TodayMedicationReminder {
 }
 
 /// 今日用药提醒 Provider
+/// 监听用药记录变化，自动刷新提醒列表
 final todayMedicationRemindersProvider = FutureProvider<List<TodayMedicationReminder>>((
   ref,
 ) async {
   final currentId = ref.watch(currentBabyIdProvider);
   if (currentId == null) return [];
+
+  // 监听用药记录变化以触发刷新
+  final _ = ref.watch(medicationRecordNotifierProvider);
 
   final repository = ref.watch(medicationRecordRepositoryProvider);
   final statusRepository = ref.watch(medicationStatusRepositoryProvider);

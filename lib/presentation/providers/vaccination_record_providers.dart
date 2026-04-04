@@ -52,11 +52,15 @@ class TodayVaccinationReminder {
 
 /// 今日疫苗提醒 Provider
 /// 获取计划日期为今天且未完成的疫苗接种
+/// 监听疫苗记录变化，自动刷新提醒列表
 final todayVaccinationRemindersProvider = FutureProvider<List<TodayVaccinationReminder>>((
   ref,
 ) async {
   final currentId = ref.watch(currentBabyIdProvider);
   if (currentId == null) return [];
+
+  // 监听疫苗记录变化以触发刷新
+  final _ = ref.watch(vaccinationRecordNotifierProvider);
 
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   final pendingRecords = await repository.getPending(currentId);

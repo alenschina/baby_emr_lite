@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../domain/entities/medical_record.dart';
 import '../providers/medical_record_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/forms/medical_record_form.dart';
@@ -33,25 +34,17 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               // 顶部标题栏
               _buildHeader(currentBabyAsync),
 
-              // 记录列表
+              // 记录列表 - 时间轴展示
               Expanded(
                 child: recordsAsync.when(
                   data: (records) {
                     if (records.isEmpty) {
                       return _buildEmptyState();
                     }
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      itemCount: records.length,
-                      itemBuilder: (context, index) {
-                        final record = records[index];
-                        return MedicalRecordCard(
-                          record: record,
-                          onEdit: () => _showEditRecordSheet(context, record),
-                          onDelete: () => _confirmDelete(context, record.id),
-                        );
-                      },
-                    );
+                    // 按时间倒序排列（最新的在最上方）
+                    final sortedRecords = List.of(records)
+                      ..sort((a, b) => b.visitDate.compareTo(a.visitDate));
+                    return _buildTimeline(sortedRecords);
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
@@ -170,6 +163,98 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
     );
   }
 
+  /// 构建时间轴展示
+  Widget _buildTimeline(List<MedicalRecord> records) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      itemCount: records.length,
+      itemBuilder: (context, index) {
+        final record = records[index];
+        final isFirst = index == 0;
+        final isLast = index == records.length - 1;
+
+        return _buildTimelineItem(
+          record: record,
+          isFirst: isFirst,
+          isLast: isLast,
+          onEdit: () => _showEditRecordSheet(context, record),
+          onDelete: () => _confirmDelete(context, record.id),
+        );
+      },
+    );
+  }
+
+  /// 构建时间轴单个节点
+  Widget _buildTimelineItem({
+    required MedicalRecord record,
+    required bool isFirst,
+    required bool isLast,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 左侧时间轴
+        SizedBox(
+          width: 60,
+          child: Column(
+            children: [
+              // 时间轴节点
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: isFirst ? AppTheme.brandPrimary : AppTheme.brandPrimary.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.brandPrimary.withOpacity(0.3),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+              // 连接线
+              if (!isLast)
+                Container(
+                  width: 2,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppTheme.brandPrimary.withOpacity(0.4),
+                        AppTheme.brandPrimary.withOpacity(0.1),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // 右侧内容卡片
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _TimelineRecordCard(
+              record: record,
+              isFirst: isFirst,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showAddRecordSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -180,7 +265,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
     );
   }
 
-  void _showEditRecordSheet(BuildContext context, record) {
+  void _showEditRecordSheet(BuildContext context, MedicalRecord record) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -220,5 +305,273 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
         ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
       }
     }
+  }
+}
+
+/// 时间轴病例记录卡片组件
+class _TimelineRecordCard extends StatelessWidget {
+  final MedicalRecord record;
+  final bool isFirst;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  const _TimelineRecordCard({
+    required this.record,
+    this.isFirst = false,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isFirst
+            ? AppTheme.glassCardGradientHigh
+            : AppTheme.glassCardGradient,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isFirst ? AppTheme.brandPrimary.withOpacity(0.3) : AppTheme.glassBorder,
+          width: 1,
+        ),
+        boxShadow: isFirst
+            ? [
+                BoxShadow(
+                  color: AppTheme.brandPrimary.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部：日期标签
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.brandPrimary.withOpacity(0.1),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.event_note_rounded,
+                  size: 16,
+                  color: AppTheme.brandPrimary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _formatDate(record.visitDate),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.brandPrimary,
+                    fontFamily: AppTheme.fontFamily,
+                  ),
+                ),
+                const Spacer(),
+                // 操作按钮
+                if (onEdit != null)
+                  GestureDetector(
+                    onTap: onEdit,
+                    child: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: AppTheme.textTertiary,
+                    ),
+                  ),
+                if (onDelete != null) ...[
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: AppTheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // 内容区域
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 医院名称
+                Row(
+                  children: [
+                    Icon(
+                      Icons.local_hospital_rounded,
+                      size: 18,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        record.hospital,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                          fontFamily: AppTheme.fontFamily,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // 诊断结果
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.assignment_turned_in_outlined,
+                        size: 16,
+                        color: AppTheme.success,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          record.diagnosis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.success,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // 症状
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.sick_outlined,
+                      size: 16,
+                      color: AppTheme.textTertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '症状: ${record.symptoms}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                          fontFamily: AppTheme.fontFamily,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // 医生
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline_rounded,
+                      size: 16,
+                      color: AppTheme.textTertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '主治医生: ${record.doctor}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textTertiary,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // 处方药物
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.brandPrimary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.medication_rounded,
+                        size: 16,
+                        color: AppTheme.brandPrimary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                        record.medications,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.brandPrimary,
+                          fontFamily: AppTheme.fontFamily,
+                        ),
+                      ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 备注（如果有）
+                if (record.notes.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.notes_outlined,
+                        size: 16,
+                        color: AppTheme.textTertiary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          record.notes,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textTertiary,
+                            fontStyle: FontStyle.italic,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}年${date.month}月${date.day}日';
   }
 }
