@@ -626,10 +626,7 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
 
                   // 诊断结果（始终展开）
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppTheme.success.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
