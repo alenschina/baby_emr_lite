@@ -330,6 +330,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
           record: record,
           isFirst: isFirst,
           isLast: isLast,
+          index: index,
           onEdit: () => _showEditRecordSheet(context, record),
           onDelete: () => _confirmDelete(context, record.id),
         );
@@ -342,9 +343,13 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
     required MedicalRecord record,
     required bool isFirst,
     required bool isLast,
+    required int index,
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
+    // 所有记录默认折叠
+    final shouldCollapse = true;
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -398,6 +403,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
             child: _TimelineRecordCard(
               record: record,
               isFirst: isFirst,
+              shouldCollapse: shouldCollapse,
               onEdit: onEdit,
               onDelete: onDelete,
             ),
@@ -469,34 +475,56 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
 }
 
 /// 时间轴病例记录卡片组件
-class _TimelineRecordCard extends StatelessWidget {
+class _TimelineRecordCard extends StatefulWidget {
   final MedicalRecord record;
   final bool isFirst;
+  final bool shouldCollapse;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   const _TimelineRecordCard({
     required this.record,
     this.isFirst = false,
+    this.shouldCollapse = false,
     this.onEdit,
     this.onDelete,
   });
 
   @override
+  State<_TimelineRecordCard> createState() => _TimelineRecordCardState();
+}
+
+class _TimelineRecordCardState extends State<_TimelineRecordCard> {
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    // 前两条记录默认展开，从第三条开始默认折叠
+    _isExpanded = !widget.shouldCollapse;
+  }
+
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: isFirst
+        gradient: widget.isFirst
             ? AppTheme.glassCardGradientHigh
             : AppTheme.glassCardGradient,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isFirst
+          color: widget.isFirst
               ? AppTheme.brandPrimary.withOpacity(0.3)
               : AppTheme.glassBorder,
           width: 1,
         ),
-        boxShadow: isFirst
+        boxShadow: widget.isFirst
             ? [
                 BoxShadow(
                   color: AppTheme.brandPrimary.withOpacity(0.1),
@@ -527,7 +555,7 @@ class _TimelineRecordCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _formatDate(record.visitDate),
+                  _formatDate(widget.record.visitDate),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -536,20 +564,30 @@ class _TimelineRecordCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                // 展开/折叠按钮
+                GestureDetector(
+                  onTap: _toggleExpanded,
+                  child: Icon(
+                    _isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                    size: 20,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 // 操作按钮
-                if (onEdit != null)
+                if (widget.onEdit != null)
                   GestureDetector(
-                    onTap: onEdit,
+                    onTap: widget.onEdit,
                     child: Icon(
                       Icons.edit_outlined,
                       size: 18,
                       color: AppTheme.textTertiary,
                     ),
                   ),
-                if (onDelete != null) ...[
+                if (widget.onDelete != null) ...[
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: onDelete,
+                    onTap: widget.onDelete,
                     child: Icon(
                       Icons.delete_outline,
                       size: 18,
@@ -567,7 +605,7 @@ class _TimelineRecordCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 医院名称
+                // 医院名称（始终展开）
                 Row(
                   children: [
                     Icon(
@@ -576,22 +614,22 @@ class _TimelineRecordCard extends StatelessWidget {
                       color: AppTheme.textSecondary,
                     ),
                     const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        record.hospital,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
-                          fontFamily: AppTheme.fontFamily,
+                      Expanded(
+                        child: Text(
+                          widget.record.hospital,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
 
-                // 诊断结果
+                // 诊断结果（始终展开）
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -611,7 +649,7 @@ class _TimelineRecordCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          record.diagnosis,
+                          widget.record.diagnosis,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -625,54 +663,66 @@ class _TimelineRecordCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // 症状
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.sick_outlined,
-                      size: 16,
-                      color: AppTheme.textTertiary,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        '症状: ${record.symptoms}',
+                // 可折叠区域：症状、医生
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: _isExpanded
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 症状
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.sick_outlined,
+                                  size: 16,
+                                  color: AppTheme.textTertiary,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                        child: Text(
+                          '症状: ${widget.record.symptoms}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                            fontFamily: AppTheme.fontFamily,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+
+                            // 医生
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 16,
+                                  color: AppTheme.textTertiary,
+                                ),
+                                const SizedBox(width: 6),
+                                                     Text(
+                        '主治医生: ${widget.record.doctor}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppTheme.textSecondary,
+                          color: AppTheme.textTertiary,
                           fontFamily: AppTheme.fontFamily,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
                 ),
-                const SizedBox(height: 8),
 
-                // 医生
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person_outline_rounded,
-                      size: 16,
-                      color: AppTheme.textTertiary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '主治医生: ${record.doctor}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppTheme.textTertiary,
-                        fontFamily: AppTheme.fontFamily,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // 处方药物
+                // 处方药物（始终展开）
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -690,7 +740,7 @@ class _TimelineRecordCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          record.medications,
+                          widget.record.medications,
                           style: TextStyle(
                             fontSize: 13,
                             color: AppTheme.brandPrimary,
@@ -702,8 +752,8 @@ class _TimelineRecordCard extends StatelessWidget {
                   ),
                 ),
 
-                // 备注（如果有）
-                if (record.notes.isNotEmpty) ...[
+                // 备注（如果有，始终展开）
+                if (widget.record.notes.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -716,7 +766,7 @@ class _TimelineRecordCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          record.notes,
+                          widget.record.notes,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppTheme.textTertiary,
