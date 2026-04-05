@@ -30,6 +30,7 @@ class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
   late String? selectedHospital;
   late TextEditingController diagnosisController;
   late TextEditingController medicationController;
+  bool _isSyncingFromParent = false;
 
   @override
   void initState() {
@@ -49,17 +50,22 @@ class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
   @override
   void didUpdateWidget(MedicalRecordFilterPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentFilter != widget.currentFilter) {
+    if (!_isSameFilter(oldWidget.currentFilter, widget.currentFilter)) {
+      _isSyncingFromParent = true;
       selectedStartYear = widget.currentFilter.startYear;
       selectedEndYear = widget.currentFilter.endYear;
       selectedHospital = widget.currentFilter.hospital;
-      if (widget.currentFilter.diagnosisKeyword != diagnosisController.text) {
-        diagnosisController.text = widget.currentFilter.diagnosisKeyword ?? '';
+
+      final diagnosisText = widget.currentFilter.diagnosisKeyword ?? '';
+      if (diagnosisText != diagnosisController.text) {
+        diagnosisController.text = diagnosisText;
       }
-      if (widget.currentFilter.medicationKeyword !=
-          medicationController.text) {
-        medicationController.text = widget.currentFilter.medicationKeyword ?? '';
+
+      final medicationText = widget.currentFilter.medicationKeyword ?? '';
+      if (medicationText != medicationController.text) {
+        medicationController.text = medicationText;
       }
+      _isSyncingFromParent = false;
     }
   }
 
@@ -71,18 +77,33 @@ class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
   }
 
   void _onChanged() {
-    final filter = widget.currentFilter.copyWith(
+    if (_isSyncingFromParent) return;
+
+    final filter = _buildCurrentFilter();
+    if (_isSameFilter(filter, widget.currentFilter)) return;
+
+    widget.onFilterChanged(filter);
+  }
+
+  MedicalRecordFilter _buildCurrentFilter() {
+    final diagnosisKeyword = diagnosisController.text.trim();
+    final medicationKeyword = medicationController.text.trim();
+
+    return MedicalRecordFilter(
       startYear: selectedStartYear,
       endYear: selectedEndYear,
       hospital: selectedHospital?.isEmpty == true ? null : selectedHospital,
-      diagnosisKeyword: diagnosisController.text.isEmpty
-          ? null
-          : diagnosisController.text.trim(),
-      medicationKeyword: medicationController.text.isEmpty
-          ? null
-          : medicationController.text.trim(),
+      diagnosisKeyword: diagnosisKeyword.isEmpty ? null : diagnosisKeyword,
+      medicationKeyword: medicationKeyword.isEmpty ? null : medicationKeyword,
     );
-    widget.onFilterChanged(filter);
+  }
+
+  bool _isSameFilter(MedicalRecordFilter a, MedicalRecordFilter b) {
+    return a.startYear == b.startYear &&
+        a.endYear == b.endYear &&
+        a.hospital == b.hospital &&
+        a.diagnosisKeyword == b.diagnosisKeyword &&
+        a.medicationKeyword == b.medicationKeyword;
   }
 
   @override
