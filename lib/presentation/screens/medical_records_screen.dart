@@ -5,7 +5,6 @@ import '../../domain/entities/medical_record.dart';
 import '../providers/medical_record_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/forms/medical_record_form.dart';
-import '../widgets/adaptive_fab.dart';
 import '../widgets/medical_record_filter_panel.dart';
 import '../models/medical_record_filter.dart';
 
@@ -129,10 +128,8 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                 ],
               ),
             ),
-            // 右上角添加按钮
-            AdaptiveFloatingActionButton(
-              onPressed: () => _showAddRecordSheet(context),
-            ),
+            // 右上角操作按钮组
+            _buildTopActionButtons(context),
           ],
         ),
       ),
@@ -141,9 +138,8 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
 
   Widget _buildHeader(AsyncValue currentBabyAsync) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 100, 12),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,86 +168,91 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               ),
             ],
           ),
-          // 过滤按钮
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _showFilter = !_showFilter;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _showFilter || _currentFilter.isActive
-                    ? AppTheme.brandPrimary.withOpacity(0.1)
-                    : Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: _showFilter || _currentFilter.isActive
-                      ? AppTheme.brandPrimary.withOpacity(0.4)
-                      : Colors.white.withOpacity(0.6),
-                  width: 1.5,
-                ),
-                boxShadow: _showFilter || _currentFilter.isActive
-                    ? [
-                        BoxShadow(
-                          color: AppTheme.brandPrimary.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.filter_list_rounded,
-                    size: 20,
-                    color: _showFilter || _currentFilter.isActive
-                        ? AppTheme.brandPrimary
-                        : AppTheme.textSecondary,
-                  ),
-                  if (_currentFilter.isActive) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.brandPrimary,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.brandPrimary.withOpacity(0.3),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: const Text(
-                        '已筛选',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTopActionButtons(BuildContext context) {
+    const double buttonSize = 40;
+    const double gap = 12;
+    const double spacing = 16;
+
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: spacing, right: spacing),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTopActionButton(
+                icon: Icons.filter_list_rounded,
+                size: buttonSize,
+                active: _showFilter || _currentFilter.isActive,
+                onTap: () {
+                  setState(() {
+                    _showFilter = !_showFilter;
+                  });
+                },
+              ),
+              const SizedBox(width: gap),
+              _buildTopActionButton(
+                icon: Icons.add_rounded,
+                size: buttonSize,
+                active: true,
+                onTap: () => _showAddRecordSheet(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopActionButton({
+    required IconData icon,
+    required double size,
+    required bool active,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: size,
+              height: size,
+              decoration: AppTheme.liquidFabDecoration(
+                gradientColor: active ? null : const Color(0xFF7C8DB5),
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            if (icon == Icons.filter_list_rounded && _currentFilter.isActive)
+              Positioned(
+                top: -2,
+                right: -2,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.brandPrimary.withOpacity(0.8),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
