@@ -11,11 +11,19 @@ import '../widgets/glass_card.dart';
 
 /// 数据管理屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态卡片
-class DataManagementScreen extends ConsumerWidget {
+class DataManagementScreen extends ConsumerStatefulWidget {
   const DataManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DataManagementScreen> createState() => _DataManagementScreenState();
+}
+
+class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
+
+  bool _isFormExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final babiesAsync = ref.watch(babyNotifierProvider);
 
     return Scaffold(
@@ -119,8 +127,8 @@ class DataManagementScreen extends ConsumerWidget {
 
                     const SizedBox(height: 24),
 
-                    // 添加新宝宝表单
-                    const AddBabyForm(),
+                    // 添加新宝宝（可折叠）
+                    _buildCollapsibleAddBabySection(),
 
                     const SizedBox(height: 32),
 
@@ -189,6 +197,55 @@ class DataManagementScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCollapsibleAddBabySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // 展开/折叠按钮
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isFormExpanded = !_isFormExpanded;
+            });
+          },
+          child: GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            onTap: null,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _isFormExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                  size: 20,
+                  color: AppTheme.brandPrimary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '添加新宝宝',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.brandPrimary,
+                    fontFamily: AppTheme.fontFamily,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 可折叠表单内容
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _isFormExpanded
+              ? const AddBabyForm()
+              : const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 
