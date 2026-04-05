@@ -6,6 +6,8 @@ import '../providers/medical_record_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/forms/medical_record_form.dart';
 import '../widgets/adaptive_fab.dart';
+import '../widgets/medical_record_filter_panel.dart';
+import '../models/medical_record_filter.dart';
 
 /// 病例记录屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -18,6 +20,9 @@ class MedicalRecordsScreen extends ConsumerStatefulWidget {
 }
 
 class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
+  bool _showFilter = false;
+  MedicalRecordFilter _currentFilter = const MedicalRecordFilter();
+
   @override
   Widget build(BuildContext context) {
     final recordsAsync = ref.watch(medicalRecordNotifierProvider);
@@ -37,6 +42,31 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                   // 顶部标题栏
                   _buildHeader(currentBabyAsync),
 
+                  // 过滤面板
+                  if (_showFilter)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: MedicalRecordFilterPanel(
+                        currentFilter: _currentFilter,
+                        availableHospitals: _getAvailableHospitals(
+                          recordsAsync.value ?? [],
+                        ),
+                        availableYears: _getAvailableYears(
+                          recordsAsync.value ?? [],
+                        ),
+                        onFilterChanged: (filter) {
+                          setState(() {
+                            _currentFilter = filter;
+                          });
+                        },
+                        onClear: () {
+                          setState(() {
+                            _currentFilter = const MedicalRecordFilter();
+                          });
+                        },
+                      ),
+                    ),
+
                   // 记录列表 - 时间轴展示
                   Expanded(
                     child: recordsAsync.when(
@@ -44,8 +74,21 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                         if (records.isEmpty) {
                           return _buildEmptyState();
                         }
+
+                        // 应用过滤器
+                        final filteredRecords =
+                            _currentFilter.isActive
+                                ? ref
+                                    .read(medicalRecordNotifierProvider.notifier)
+                                    .filterRecords(_currentFilter)
+                                : records;
+
+                        if (filteredRecords.isEmpty && _currentFilter.isActive) {
+                          return _buildEmptyFilterState();
+                        }
+
                         // 按时间倒序排列（最新的在最上方）
-                        final sortedRecords = List.of(records)
+                        final sortedRecords = List.of(filteredRecords)
                           ..sort((a, b) => b.visitDate.compareTo(a.visitDate));
                         return _buildTimeline(sortedRecords);
                       },
@@ -129,6 +172,62 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               ),
             ],
           ),
+          // 过滤按钮
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _showFilter = !_showFilter;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _showFilter || _currentFilter.isActive
+                    ? AppTheme.brandPrimary.withOpacity(0.1)
+                    : Colors.white.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _showFilter || _currentFilter.isActive
+                      ? AppTheme.brandPrimary.withOpacity(0.3)
+                      : Colors.white.withOpacity(0.5),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.filter_list_rounded,
+                    size: 18,
+                    color: _showFilter || _currentFilter.isActive
+                        ? AppTheme.brandPrimary
+                        : AppTheme.textSecondary,
+                  ),
+                  if (_currentFilter.isActive) ...[
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.brandPrimary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        '已筛选',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -156,6 +255,39 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
           const SizedBox(height: 8),
           Text(
             '点击右上角按钮添加记录',
+            style: TextStyle(
+              fontSize: AppTheme.fontSizeCaption,
+              color: AppTheme.textTertiary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyFilterState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.filter_alt_outlined,
+            size: 64,
+            color: AppTheme.slate300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '没有符合条件的记录',
+            style: TextStyle(
+              fontSize: AppTheme.fontSizeBody,
+              color: AppTheme.textSecondary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '请调整筛选条件',
             style: TextStyle(
               fontSize: AppTheme.fontSizeCaption,
               color: AppTheme.textTertiary,
@@ -201,24 +333,24 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
       children: [
         // 左侧时间轴
         SizedBox(
-          width: 60,
+          width: 40,
           child: Column(
             children: [
               // 时间轴节点
               Container(
-                width: 14,
-                height: 14,
+                width: 12,
+                height: 12,
                 decoration: BoxDecoration(
                   color: isFirst
                       ? AppTheme.brandPrimary
                       : AppTheme.brandPrimary.withOpacity(0.6),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
+                  border: Border.all(color: Colors.white, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.brandPrimary.withOpacity(0.3),
-                      blurRadius: 6,
-                      spreadRadius: 2,
+                      blurRadius: 4,
+                      spreadRadius: 1,
                     ),
                   ],
                 ),
@@ -226,7 +358,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               // 连接线
               if (!isLast)
                 Container(
-                  width: 2,
+                  width: 1.5,
                   height: 180,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -308,6 +440,14 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
         ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
       }
     }
+  }
+
+  List<String> _getAvailableHospitals(List<MedicalRecord> records) {
+    return MedicalRecordFilter.getAvailableHospitals(records);
+  }
+
+  List<int> _getAvailableYears(List<MedicalRecord> records) {
+    return MedicalRecordFilter.getAvailableYears(records);
   }
 }
 

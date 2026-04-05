@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/medical_record.dart';
 import '../../domain/repositories/medical_record_repository.dart';
+import '../models/medical_record_filter.dart';
 import 'core_providers.dart';
 import 'baby_providers.dart';
 
@@ -48,6 +49,52 @@ class MedicalRecordNotifier
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+  }
+
+  /// 根据过滤器筛选记录
+  List<MedicalRecord> filterRecords(MedicalRecordFilter filter) {
+    final records = state.value ?? [];
+    if (!filter.isActive) return records;
+
+    return records.where((record) {
+      // 年份区间筛选
+      if (filter.startYear != null &&
+          record.visitDate.year < filter.startYear!) {
+        return false;
+      }
+      if (filter.endYear != null && record.visitDate.year > filter.endYear!) {
+        return false;
+      }
+
+      // 医疗机构筛选
+      if (filter.hospital != null && filter.hospital!.isNotEmpty) {
+        if (!record.hospital.contains(filter.hospital!)) {
+          return false;
+        }
+      }
+
+      // 疾病类型筛选（诊断关键词）
+      if (filter.diagnosisKeyword != null &&
+          filter.diagnosisKeyword!.isNotEmpty) {
+        if (!record.diagnosis
+            .toLowerCase()
+            .contains(filter.diagnosisKeyword!.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // 药品名称筛选
+      if (filter.medicationKeyword != null &&
+          filter.medicationKeyword!.isNotEmpty) {
+        if (!record.medications
+            .toLowerCase()
+            .contains(filter.medicationKeyword!.toLowerCase())) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
   }
 
   Future<MedicalRecord?> create({
