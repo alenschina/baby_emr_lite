@@ -5,6 +5,7 @@ import '../../domain/entities/medical_record.dart';
 import '../providers/medical_record_providers.dart';
 import '../providers/baby_providers.dart';
 import '../widgets/forms/medical_record_form.dart';
+import '../widgets/glass_card.dart';
 import '../widgets/medical_record_filter_panel.dart';
 import '../models/medical_record_filter.dart';
 
@@ -190,7 +191,6 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               _buildTopActionButton(
                 icon: Icons.filter_list_rounded,
                 size: buttonSize,
-                active: _showFilter || _currentFilter.isActive,
                 onTap: () {
                   setState(() {
                     _showFilter = !_showFilter;
@@ -201,7 +201,6 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               _buildTopActionButton(
                 icon: Icons.add_rounded,
                 size: buttonSize,
-                active: true,
                 onTap: () => _showAddRecordSheet(context),
               ),
             ],
@@ -214,45 +213,39 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
   Widget _buildTopActionButton({
     required IconData icon,
     required double size,
-    required bool active,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: size,
-              height: size,
-              decoration: AppTheme.liquidFabDecoration(
-                gradientColor: active ? null : const Color(0xFF7C8DB5),
-              ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
-            if (icon == Icons.filter_list_rounded && _currentFilter.isActive)
-              Positioned(
-                top: -2,
-                right: -2,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppTheme.brandPrimary.withOpacity(0.8),
-                      width: 1.5,
-                    ),
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          GlassIconContainer(
+            icon: icon,
+            size: size,
+            iconSize: 20,
+            iconColor: AppTheme.textSecondary,
+            onTap: onTap,
+          ),
+          if (icon == Icons.filter_list_rounded && _currentFilter.isActive)
+            Positioned(
+              top: -2,
+              right: -2,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppTheme.brandPrimary.withOpacity(0.8),
+                    width: 1.5,
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
