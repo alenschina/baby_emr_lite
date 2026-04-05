@@ -512,108 +512,103 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: widget.isFirst
-            ? AppTheme.glassCardGradientHigh
-            : AppTheme.glassCardGradient,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: widget.isFirst
-              ? AppTheme.brandPrimary.withOpacity(0.3)
-              : AppTheme.glassBorder,
-          width: 1,
+    return GestureDetector(
+      onTap: _toggleExpanded,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: widget.isFirst
+              ? AppTheme.glassCardGradientHigh
+              : AppTheme.glassCardGradient,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: widget.isFirst
+                ? AppTheme.brandPrimary.withOpacity(0.3)
+                : AppTheme.glassBorder,
+            width: 1,
+          ),
+          boxShadow: widget.isFirst
+              ? [
+                  BoxShadow(
+                    color: AppTheme.brandPrimary.withOpacity(0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
-        boxShadow: widget.isFirst
-            ? [
-                BoxShadow(
-                  color: AppTheme.brandPrimary.withOpacity(0.1),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 顶部：日期标签
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.brandPrimary.withOpacity(0.1),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
-              ]
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 顶部：日期标签
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppTheme.brandPrimary.withOpacity(0.1),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.event_note_rounded,
+                    size: 16,
+                    color: AppTheme.brandPrimary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _formatDate(widget.record.visitDate),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.brandPrimary,
+                      fontFamily: AppTheme.fontFamily,
+                    ),
+                  ),
+                  const Spacer(),
+                  // 操作按钮（阻止事件冒泡）
+                  if (widget.onEdit != null)
+                    GestureDetector(
+                      onTap: widget.onEdit,
+                      behavior: HitTestBehavior.opaque,
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppTheme.textTertiary,
+                      ),
+                    ),
+                  if (widget.onDelete != null) ...[
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: widget.onDelete,
+                      behavior: HitTestBehavior.opaque,
+                      child: Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: AppTheme.error,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.event_note_rounded,
-                  size: 16,
-                  color: AppTheme.brandPrimary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  _formatDate(widget.record.visitDate),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.brandPrimary,
-                    fontFamily: AppTheme.fontFamily,
-                  ),
-                ),
-                const Spacer(),
-                // 展开/折叠按钮
-                GestureDetector(
-                  onTap: _toggleExpanded,
-                  child: Icon(
-                    _isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                    size: 20,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 操作按钮
-                if (widget.onEdit != null)
-                  GestureDetector(
-                    onTap: widget.onEdit,
-                    child: Icon(
-                      Icons.edit_outlined,
-                      size: 18,
-                      color: AppTheme.textTertiary,
-                    ),
-                  ),
-                if (widget.onDelete != null) ...[
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: widget.onDelete,
-                    child: Icon(
-                      Icons.delete_outline,
-                      size: 18,
-                      color: AppTheme.error,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
 
-          // 内容区域
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 医院名称（始终展开）
-                Row(
-                  children: [
-                    Icon(
-                      Icons.local_hospital_rounded,
-                      size: 18,
-                      color: AppTheme.textSecondary,
-                    ),
-                    const SizedBox(width: 6),
+            // 内容区域
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 医院名称（始终展开）
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_hospital_rounded,
+                        size: 18,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           widget.record.hospital,
@@ -625,165 +620,166 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
                           ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // 诊断结果（始终展开）
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.assignment_turned_in_outlined,
-                        size: 16,
-                        color: AppTheme.success,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          widget.record.diagnosis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.success,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 10),
-
-                // 可折叠区域：症状、医生
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: _isExpanded
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 症状
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.sick_outlined,
-                                  size: 16,
-                                  color: AppTheme.textTertiary,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                        child: Text(
-                          '症状: ${widget.record.symptoms}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.textSecondary,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-
-                            // 医生
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.person_outline_rounded,
-                                  size: 16,
-                                  color: AppTheme.textTertiary,
-                                ),
-                                const SizedBox(width: 6),
-                                                     Text(
-                        '主治医生: ${widget.record.doctor}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.textTertiary,
-                          fontFamily: AppTheme.fontFamily,
-                        ),
-                      ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-
-                // 处方药物（始终展开）
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.brandPrimary.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.medication_rounded,
-                        size: 16,
-                        color: AppTheme.brandPrimary,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          widget.record.medications,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.brandPrimary,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // 备注（如果有，始终展开）
-                if (widget.record.notes.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.notes_outlined,
-                        size: 16,
-                        color: AppTheme.textTertiary,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          widget.record.notes,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textTertiary,
-                            fontStyle: FontStyle.italic,
-                            fontFamily: AppTheme.fontFamily,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+
+                  // 诊断结果（始终展开）
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.assignment_turned_in_outlined,
+                          size: 16,
+                          color: AppTheme.success,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.record.diagnosis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.success,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(height: 10),
+
+                  // 可折叠区域：症状、医生
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: _isExpanded
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 症状
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.sick_outlined,
+                                    size: 16,
+                                    color: AppTheme.textTertiary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      '症状: ${widget.record.symptoms}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: AppTheme.textSecondary,
+                                        fontFamily: AppTheme.fontFamily,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+
+                              // 医生
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline_rounded,
+                                    size: 16,
+                                    color: AppTheme.textTertiary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '主治医生: ${widget.record.doctor}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppTheme.textTertiary,
+                                      fontFamily: AppTheme.fontFamily,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+
+                  // 处方药物（始终展开）
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.brandPrimary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.medication_rounded,
+                          size: 16,
+                          color: AppTheme.brandPrimary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.record.medications,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.brandPrimary,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 备注（如果有，始终展开）
+                  if (widget.record.notes.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.notes_outlined,
+                          size: 16,
+                          color: AppTheme.textTertiary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.record.notes,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textTertiary,
+                              fontStyle: FontStyle.italic,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
