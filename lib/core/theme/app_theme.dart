@@ -193,7 +193,7 @@ class AppTheme {
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         // 细腻的内发光边框
         border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
         // Liquid 风格多层柔和阴影

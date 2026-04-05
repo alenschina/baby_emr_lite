@@ -141,7 +141,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
 
   Widget _buildHeader(AsyncValue currentBabyAsync) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, 16, 100, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -180,46 +180,69 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
               });
             },
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _showFilter || _currentFilter.isActive
                     ? AppTheme.brandPrimary.withOpacity(0.1)
-                    : Colors.white.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(12),
+                    : Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: _showFilter || _currentFilter.isActive
-                      ? AppTheme.brandPrimary.withOpacity(0.3)
-                      : Colors.white.withOpacity(0.5),
-                  width: 1,
+                      ? AppTheme.brandPrimary.withOpacity(0.4)
+                      : Colors.white.withOpacity(0.6),
+                  width: 1.5,
                 ),
+                boxShadow: _showFilter || _currentFilter.isActive
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.brandPrimary.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.filter_list_rounded,
-                    size: 18,
+                    size: 20,
                     color: _showFilter || _currentFilter.isActive
                         ? AppTheme.brandPrimary
                         : AppTheme.textSecondary,
                   ),
                   if (_currentFilter.isActive) ...[
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 8,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: AppTheme.brandPrimary,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.brandPrimary.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: const Text(
                         '已筛选',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ),
