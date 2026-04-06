@@ -77,6 +77,8 @@ class GrowthDataNotifier extends StateNotifier<AsyncValue<List<GrowthData>>> {
       );
       // 重新加载以确保数据同步
       await loadRecords();
+      // 使最新数据 provider 失效，强制刷新首页显示
+      _ref.invalidate(latestGrowthDataProvider);
       return record;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -106,6 +108,8 @@ class GrowthDataNotifier extends StateNotifier<AsyncValue<List<GrowthData>>> {
         records[index] = updated;
         state = AsyncValue.data([...records]);
       }
+      // 使最新数据 provider 失效，强制刷新首页显示
+      _ref.invalidate(latestGrowthDataProvider);
       return updated;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
