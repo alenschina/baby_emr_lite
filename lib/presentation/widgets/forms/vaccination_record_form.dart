@@ -404,6 +404,12 @@ class VaccinationRecordCard extends ConsumerWidget {
 
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.cardPadding,
+        AppTheme.cardPadding,
+        AppTheme.cardPadding,
+        8,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -485,47 +491,38 @@ class VaccinationRecordCard extends ConsumerWidget {
               runSpacing: 4,
               children: [
                 if (record.batchNumber != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.tag, size: 14, color: AppTheme.textTertiary),
-                      const SizedBox(width: 4),
-                      Text(
-                        '批号: ${record.batchNumber}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.textTertiary,
-                          fontFamily: AppTheme.fontFamily,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '批号: ${record.batchNumber}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textTertiary,
+                      fontFamily: AppTheme.fontFamily,
+                    ),
+                  ),
+                if (record.batchNumber != null && record.injectionSite != null)
+                  Text(
+                    ' | ',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textTertiary,
+                      fontFamily: AppTheme.fontFamily,
+                    ),
                   ),
                 if (record.injectionSite != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: AppTheme.textTertiary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '部位: ${record.injectionSite}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppTheme.textTertiary,
-                          fontFamily: AppTheme.fontFamily,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '部位: ${record.injectionSite}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textTertiary,
+                      fontFamily: AppTheme.fontFamily,
+                    ),
                   ),
               ],
             ),
           ],
 
           // 操作按钮
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

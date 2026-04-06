@@ -195,7 +195,7 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       itemCount: records.length,
       itemBuilder: (context, index) {
         final record = records[index];
