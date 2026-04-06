@@ -62,8 +62,8 @@ class AppTheme {
   static Color get glassInputBackground => Colors.white.withOpacity(0.6);
 
   // ==================== 字体配置 ====================
-  /// 默认字体栈：iOS SF 系列，Android/国产机系统中文字体
-  static const String fontFamily = 'SF Pro Display';
+  /// 抖音美好体
+  static const String fontFamily = 'DouyinSans';
 
   /// 字号/字重规范
   static const double fontSizePageTitle = 18; // Page Title - 顶栏标题
