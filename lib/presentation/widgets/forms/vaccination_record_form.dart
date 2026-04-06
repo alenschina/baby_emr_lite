@@ -455,7 +455,7 @@ class VaccinationRecordCard extends ConsumerWidget {
           ),
 
           // 实际接种日期
-          if (record.actualDate != null) ...[
+          if (record.isCompleted && record.actualDate != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [

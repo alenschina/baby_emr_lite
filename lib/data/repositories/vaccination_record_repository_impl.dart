@@ -95,13 +95,14 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     }
 
     final existing = all[index];
+    final nextIsCompleted = isCompleted ?? existing.isCompleted;
     final updated = existing.copyWith(
       vaccineName: vaccineName ?? existing.vaccineName,
       scheduledDate: scheduledDate ?? existing.scheduledDate,
-      actualDate: actualDate ?? existing.actualDate,
+      actualDate: nextIsCompleted ? (actualDate ?? existing.actualDate) : null,
       batchNumber: batchNumber ?? existing.batchNumber,
       injectionSite: injectionSite ?? existing.injectionSite,
-      isCompleted: isCompleted ?? existing.isCompleted,
+      isCompleted: nextIsCompleted,
     );
 
     all[index] = updated;
