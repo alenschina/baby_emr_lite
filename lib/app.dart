@@ -3,8 +3,8 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
 /// 应用根组件
-class BabyEmrApp extends StatelessWidget {
-  const BabyEmrApp({super.key});
+class BabyEmrLiteApp extends StatelessWidget {
+  const BabyEmrLiteApp({super.key});
 
   @override
   Widget build(BuildContext context) {

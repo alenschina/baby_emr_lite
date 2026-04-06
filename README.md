@@ -98,7 +98,7 @@ lib/
 ### 安装依赖
 
 ```bash
-cd baby_emr_flutter
+cd baby_emr_lite
 flutter pub get
 ```
 

@@ -1,4 +1,4 @@
-package com.babyemr.baby_emr_flutter
+package com.babyemr.baby_emr_lite
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -13,6 +13,6 @@ void main() async {
   await container.read(appInitializationProvider.future);
 
   runApp(
-    UncontrolledProviderScope(container: container, child: const BabyEmrApp()),
+    UncontrolledProviderScope(container: container, child: const BabyEmrLiteApp()),
   );
 }

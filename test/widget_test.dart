@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:baby_emr_flutter/app.dart';
+import 'package:baby_emr_lite/app.dart';
 
 void main() {
   testWidgets('App initialization test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: BabyEmrApp()));
+    await tester.pumpWidget(const ProviderScope(child: BabyEmrLiteApp()));
 
     // Wait for initialization
     await tester.pump();
