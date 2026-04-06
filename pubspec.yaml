@@ -1,4 +1,4 @@
-name: baby_emr_flutter
+name: baby_emr_lite
 description: "幼儿病例记录移动应用 - Flutter版"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -73,6 +73,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
   
   # 代码生成工具
   build_runner: ^2.4.0
@@ -122,3 +123,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icons/app_icon_1024.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#F57C2A"
+  adaptive_icon_foreground: assets/icons/app_icon_1024.png
