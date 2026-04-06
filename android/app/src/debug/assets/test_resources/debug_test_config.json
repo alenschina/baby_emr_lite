@@ -1,0 +1,6 @@
+{
+  "environment": "debug",
+  "enableVerboseLogging": true,
+  "logTags": ["Flutter", "BabyCare", "Network"],
+  "collectCrashContext": true
+}

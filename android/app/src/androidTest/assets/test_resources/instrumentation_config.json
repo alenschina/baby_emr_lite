@@ -1,0 +1,5 @@
+{
+  "runner": "androidx.test.runner.AndroidJUnitRunner",
+  "captureLogcat": true,
+  "includeDeviceInfo": true
+}
