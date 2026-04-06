@@ -401,8 +401,14 @@ class VaccinationRecordCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCompleted = record.isCompleted;
-    final isOverdue =
-        !isCompleted && record.scheduledDate.isBefore(DateTime.now());
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final scheduledDateOnly = DateTime(
+      record.scheduledDate.year,
+      record.scheduledDate.month,
+      record.scheduledDate.day,
+    );
+    final isOverdue = !isCompleted && scheduledDateOnly.isBefore(today);
 
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
