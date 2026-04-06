@@ -19,6 +19,7 @@ abstract class VaccinationRecordRepository {
     required String babyId,
     required String vaccineName,
     required DateTime scheduledDate,
+    DateTime? actualDate,
     String? batchNumber,
     String? injectionSite,
   });

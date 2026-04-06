@@ -56,6 +56,7 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String babyId,
     required String vaccineName,
     required DateTime scheduledDate,
+    DateTime? actualDate,
     String? batchNumber,
     String? injectionSite,
   }) async {
@@ -65,9 +66,10 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       babyId: babyId,
       vaccineName: vaccineName,
       scheduledDate: scheduledDate,
+      actualDate: actualDate,
       batchNumber: batchNumber,
       injectionSite: injectionSite,
-      isCompleted: false,
+      isCompleted: actualDate != null,
       createdAt: now,
     );
 

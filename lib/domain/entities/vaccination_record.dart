@@ -26,6 +26,7 @@ class VaccinationRecord with _$VaccinationRecord {
     required String babyId,
     required String vaccineName,
     required DateTime scheduledDate,
+    DateTime? actualDate,
     String? batchNumber,
     String? injectionSite,
   }) {
@@ -34,9 +35,10 @@ class VaccinationRecord with _$VaccinationRecord {
       babyId: babyId,
       vaccineName: vaccineName,
       scheduledDate: scheduledDate,
+      actualDate: actualDate,
       batchNumber: batchNumber,
       injectionSite: injectionSite,
-      isCompleted: false,
+      isCompleted: actualDate != null,
       createdAt: DateTime.now(),
     );
   }

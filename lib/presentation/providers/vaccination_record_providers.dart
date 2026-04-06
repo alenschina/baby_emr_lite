@@ -126,6 +126,7 @@ class VaccinationRecordNotifier
   Future<VaccinationRecord?> create({
     required String vaccineName,
     required DateTime scheduledDate,
+    DateTime? actualDate,
     String? batchNumber,
     String? injectionSite,
   }) async {
@@ -137,6 +138,7 @@ class VaccinationRecordNotifier
         babyId: babyId,
         vaccineName: vaccineName,
         scheduledDate: scheduledDate,
+        actualDate: actualDate,
         batchNumber: batchNumber,
         injectionSite: injectionSite,
       );

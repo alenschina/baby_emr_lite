@@ -353,6 +353,7 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
         await notifier.create(
           vaccineName: _vaccineNameController.text.trim(),
           scheduledDate: _scheduledDate,
+          actualDate: _actualDate,
           batchNumber: _batchNumberController.text.trim().isNotEmpty
               ? _batchNumberController.text.trim()
               : null,
@@ -361,9 +362,10 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
               : null,
         );
         if (mounted) {
+          final message = _actualDate != null ? '疫苗接种记录添加成功' : '疫苗计划添加成功';
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('疫苗计划添加成功')));
+          ).showSnackBar(SnackBar(content: Text(message)));
         }
       }
 
@@ -486,9 +488,8 @@ class VaccinationRecordCard extends ConsumerWidget {
           // 批号和接种部位
           if (record.batchNumber != null || record.injectionSite != null) ...[
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 12,
-              runSpacing: 4,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (record.batchNumber != null)
                   Text(
@@ -499,16 +500,8 @@ class VaccinationRecordCard extends ConsumerWidget {
                       fontFamily: AppTheme.fontFamily,
                     ),
                   ),
-                if (record.batchNumber != null && record.injectionSite != null)
-                  Text(
-                    ' | ',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textTertiary,
-                      fontFamily: AppTheme.fontFamily,
-                    ),
-                  ),
-                if (record.injectionSite != null)
+                if (record.injectionSite != null) ...[
+                  if (record.batchNumber != null) const SizedBox(height: 4),
                   Text(
                     '部位: ${record.injectionSite}',
                     style: TextStyle(
@@ -517,6 +510,7 @@ class VaccinationRecordCard extends ConsumerWidget {
                       fontFamily: AppTheme.fontFamily,
                     ),
                   ),
+                ],
               ],
             ),
           ],
