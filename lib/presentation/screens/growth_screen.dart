@@ -607,7 +607,7 @@ class _TimelineGrowthBar extends StatelessWidget {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: 8,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
@@ -618,42 +618,47 @@ class _TimelineGrowthBar extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.height_rounded,
-                          size: 14,
+                          size: 12,
                           color: AppTheme.brandPrimary,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          record.height.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
-                            fontFamily: AppTheme.fontFamily,
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            record.height.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
-                        const SizedBox(width: 2),
+                        const SizedBox(width: 1),
                         Text(
                           'cm',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             color: AppTheme.textTertiary,
                             fontFamily: AppTheme.fontFamily,
                           ),
                         ),
                         if (heightDiff != null && heightDiff != 0) ...[
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           _buildDiffBadge(heightDiff!, AppTheme.brandPrimary),
                         ],
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 // 体重数据
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: 8,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
@@ -664,30 +669,35 @@ class _TimelineGrowthBar extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.monitor_weight_rounded,
-                          size: 14,
+                          size: 12,
                           color: AppTheme.success,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          record.weight.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
-                            fontFamily: AppTheme.fontFamily,
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            record.weight.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                              fontFamily: AppTheme.fontFamily,
+                            ),
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
-                        const SizedBox(width: 2),
+                        const SizedBox(width: 1),
                         Text(
                           'kg',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             color: AppTheme.textTertiary,
                             fontFamily: AppTheme.fontFamily,
                           ),
                         ),
                         if (weightDiff != null && weightDiff != 0) ...[
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           _buildDiffBadge(weightDiff!, AppTheme.success),
                         ],
                       ],
@@ -706,27 +716,32 @@ class _TimelineGrowthBar extends StatelessWidget {
     final isPositive = diff > 0;
     final color = isPositive ? AppTheme.success : AppTheme.error;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-            size: 10,
+            size: 9,
             color: color,
           ),
-          const SizedBox(width: 2),
-          Text(
-            diff.abs().toStringAsFixed(1),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
-              fontFamily: AppTheme.fontFamily,
+          const SizedBox(width: 1),
+          Flexible(
+            child: Text(
+              diff.abs().toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: color,
+                fontFamily: AppTheme.fontFamily,
+              ),
+              overflow: TextOverflow.fade,
+              maxLines: 1,
+              softWrap: false,
             ),
           ),
         ],
