@@ -7,7 +7,8 @@ import '../providers/baby_providers.dart';
 import '../utils/baby_record_guard.dart';
 import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/forms/medication_record_form.dart';
+import '../widgets/forms/medication_plan_card.dart';
+import '../widgets/forms/medication_plan_form.dart';
 import '../widgets/adaptive_fab.dart';
 import '../widgets/medication_today_checkin_sheet.dart';
 
@@ -38,7 +39,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
   @override
   Widget build(BuildContext context) {
-    final recordsAsync = ref.watch(medicationRecordNotifierProvider);
+    final plansAsync = ref.watch(medicationPlanNotifierProvider);
     final currentBabyAsync = ref.watch(currentBabyProvider);
 
     return Scaffold(
@@ -62,22 +63,29 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
                   // Tab 内容
                   Expanded(
-                    child: recordsAsync.when(
-                      data: (records) {
-                        final activeRecords = records
-                            .where((r) => r.isActive)
-                            .toList();
-                        final inactiveRecords = records
-                            .where((r) => !r.isActive)
-                            .toList();
+                    child: plansAsync.when(
+                      data: (plans) {
+                        final now = DateTime.now();
+                        final todayDate = DateTime(now.year, now.month, now.day);
+                        bool isActivePlan(MedicationPlanAggregate a) {
+                          final end = a.plan.endDate;
+                          if (end == null) return true;
+                          final endD = DateTime(end.year, end.month, end.day);
+                          return !endD.isBefore(todayDate);
+                        }
+
+                        final activePlans =
+                            plans.where(isActivePlan).toList();
+                        final endedPlans =
+                            plans.where((a) => !isActivePlan(a)).toList();
 
                         return TabBarView(
                           controller: _tabController,
                           children: [
                             // 当前用药
-                            _buildCurrentMedications(activeRecords),
+                            _buildCurrentMedications(context, activePlans),
                             // 用药历史
-                            _buildHistoryMedications(inactiveRecords),
+                            _buildHistoryMedications(context, endedPlans),
                             // 依从性统计（方案 C：按 plan 槽位）
                             Consumer(
                               builder: (context, ref, _) {
@@ -181,8 +189,11 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
   }
 
-  Widget _buildCurrentMedications(List records) {
-    if (records.isEmpty) {
+  Widget _buildCurrentMedications(
+    BuildContext context,
+    List<MedicationPlanAggregate> plans,
+  ) {
+    if (plans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -199,7 +210,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '点击右上角按钮添加记录',
+              '点击右上角按钮添加用药计划',
               style: TextStyle(
                 fontSize: AppTheme.fontSizeCaption,
                 color: AppTheme.textTertiary,
@@ -213,21 +224,24 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: records.length,
+      itemCount: plans.length,
       itemBuilder: (context, index) {
-        final record = records[index];
-        return MedicationRecordCard(
-          record: record,
-          onEdit: () => _showEditRecordSheet(context, record),
-          onDelete: () => _confirmDelete(context, record.id),
-          onEndMedication: () => _endMedication(context, record.id),
+        final agg = plans[index];
+        return MedicationPlanCard(
+          aggregate: agg,
+          onEdit: () => _showEditPlanSheet(context, agg),
+          onDelete: () => _confirmDeletePlan(context, agg.plan.id),
+          onEndPlan: () => _endPlan(context, agg.plan.id),
         );
       },
     );
   }
 
-  Widget _buildHistoryMedications(List records) {
-    if (records.isEmpty) {
+  Widget _buildHistoryMedications(
+    BuildContext context,
+    List<MedicationPlanAggregate> plans,
+  ) {
+    if (plans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -249,13 +263,13 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: records.length,
+      itemCount: plans.length,
       itemBuilder: (context, index) {
-        final record = records[index];
-        return MedicationRecordCard(
-          record: record,
-          onEdit: () => _showEditRecordSheet(context, record),
-          onDelete: () => _confirmDelete(context, record.id),
+        final agg = plans[index];
+        return MedicationPlanCard(
+          aggregate: agg,
+          onEdit: () => _showEditPlanSheet(context, agg),
+          onDelete: () => _confirmDeletePlan(context, agg.plan.id),
         );
       },
     );
@@ -483,21 +497,21 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const MedicationRecordForm(),
+      builder: (context) => const MedicationPlanForm(),
     );
   }
 
-  void _showEditRecordSheet(BuildContext context, record) {
+  void _showEditPlanSheet(BuildContext context, MedicationPlanAggregate agg) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => MedicationRecordForm(existingRecord: record),
+      builder: (context) => MedicationPlanForm(existingAggregate: agg),
     );
   }
 
-  Future<void> _endMedication(BuildContext context, String id) async {
+  Future<void> _endPlan(BuildContext context, String planId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -517,23 +531,23 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
 
     if (confirmed == true && mounted) {
-      final result = await ref
-          .read(medicationRecordNotifierProvider.notifier)
-          .endMedication(id, DateTime.now());
+      final ok = await ref
+          .read(medicationPlanNotifierProvider.notifier)
+          .endPlan(planId, DateTime.now());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result != null ? '用药计划已结束' : '操作失败')),
+          SnackBar(content: Text(ok ? '用药计划已结束' : '操作失败')),
         );
       }
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, String id) async {
+  Future<void> _confirmDeletePlan(BuildContext context, String planId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('确认删除'),
-        content: const Text('确定要删除这条用药记录吗？此操作无法撤销。'),
+        content: const Text('确定要删除该用药计划吗？打卡记录将一并清除，且无法撤销。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -550,12 +564,12 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     if (confirmed == true && mounted) {
       final success = await ref
-          .read(medicationRecordNotifierProvider.notifier)
-          .delete(id);
+          .read(medicationPlanNotifierProvider.notifier)
+          .deletePlan(planId);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
+        ).showSnackBar(SnackBar(content: Text(success ? '计划已删除' : '删除失败')));
       }
     }
   }

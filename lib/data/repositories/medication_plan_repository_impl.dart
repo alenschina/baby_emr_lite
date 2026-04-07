@@ -261,5 +261,20 @@ class MedicationPlanRepositoryImpl implements MedicationPlanRepository {
         _getIntakeStatuses()..removeWhere((s) => s.planId == planId);
     await _saveIntakeStatuses(statuses);
   }
+
+  @override
+  Future<bool> updatePlanEndDate(String planId, DateTime endDate) async {
+    final plans = _getPlans();
+    final idx = plans.indexWhere((p) => p.id == planId);
+    if (idx == -1) return false;
+    final normalized = DateTime(endDate.year, endDate.month, endDate.day);
+    final p = plans[idx];
+    plans[idx] = p.copyWith(
+      endDate: normalized,
+      updatedAt: DateTime.now(),
+    );
+    await _savePlans(plans);
+    return true;
+  }
 }
 

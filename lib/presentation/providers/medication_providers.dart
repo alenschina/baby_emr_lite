@@ -3,8 +3,10 @@ import '../../domain/entities/medication_record.dart';
 import '../../domain/entities/medication_status.dart';
 import '../../domain/entities/medication_reminder.dart';
 import '../../domain/entities/medication_plan_aggregate.dart';
+import '../../domain/entities/medication_plan_upsert_input.dart';
 import '../../domain/enums/medication_status_type.dart';
 import '../../domain/enums/medication_intake_status_type.dart';
+import '../../domain/repositories/medication_plan_repository.dart';
 import '../../domain/repositories/medication_record_repository.dart';
 import '../../domain/repositories/medication_status_repository.dart';
 import '../../domain/repositories/medication_reminder_repository.dart';
@@ -697,3 +699,94 @@ final todayMedicationCheckinItemsProvider =
       });
       return items;
     });
+
+/// 方案 C：用药计划列表变更后需刷新的派生 Provider（打卡、提醒、依从性等）
+void invalidateMedicationPlanDerivedProviders(Ref ref, {String? planId}) {
+  ref.invalidate(medicationPlanAggregatesProvider);
+  ref.invalidate(activeMedicationPlanAggregatesProvider);
+  ref.invalidate(todayMedicationCheckinItemsProvider);
+  ref.invalidate(todayMedicationRemindersProvider);
+  if (planId != null) {
+    ref.invalidate(medicationPlanSlotComplianceProvider(planId));
+  }
+}
+
+/// 用药计划（方案 C）列表与写操作
+class MedicationPlanNotifier
+    extends StateNotifier<AsyncValue<List<MedicationPlanAggregate>>> {
+  MedicationPlanNotifier(this._repository, this._ref)
+    : super(const AsyncValue.loading()) {
+    _ref.listen<String?>(currentBabyIdProvider, (previous, next) {
+      if (previous != next) {
+        loadPlans();
+      }
+    });
+    loadPlans();
+  }
+
+  final MedicationPlanRepository _repository;
+  final Ref _ref;
+
+  String? get _babyId => _ref.read(currentBabyIdProvider);
+
+  Future<void> loadPlans() async {
+    final babyId = _babyId;
+    if (babyId == null) {
+      state = const AsyncValue.data([]);
+      return;
+    }
+
+    state = const AsyncValue.loading();
+    try {
+      final list = await _repository.listAggregatesByBabyId(babyId);
+      state = AsyncValue.data(list);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<MedicationPlanAggregate?> upsertPlan(MedicationPlanUpsertInput input) async {
+    try {
+      final agg = await _repository.upsertWithDetails(input);
+      invalidateMedicationPlanDerivedProviders(_ref, planId: agg.plan.id);
+      await loadPlans();
+      return agg;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return null;
+    }
+  }
+
+  Future<bool> deletePlan(String planId) async {
+    try {
+      await _repository.deletePlan(planId);
+      invalidateMedicationPlanDerivedProviders(_ref, planId: planId);
+      await loadPlans();
+      return true;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false;
+    }
+  }
+
+  Future<bool> endPlan(String planId, DateTime endDate) async {
+    try {
+      final ok = await _repository.updatePlanEndDate(planId, endDate);
+      if (!ok) return false;
+      invalidateMedicationPlanDerivedProviders(_ref, planId: planId);
+      await loadPlans();
+      return true;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false;
+    }
+  }
+}
+
+final medicationPlanNotifierProvider = StateNotifierProvider<
+  MedicationPlanNotifier,
+  AsyncValue<List<MedicationPlanAggregate>>
+>((ref) {
+  final repository = ref.watch(medicationPlanRepositoryProvider);
+  return MedicationPlanNotifier(repository, ref);
+});
