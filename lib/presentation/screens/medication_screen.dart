@@ -8,6 +8,7 @@ import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/medication_record_form.dart';
 import '../widgets/adaptive_fab.dart';
+import '../widgets/medication_today_checkin_sheet.dart';
 
 /// 用药管理屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -137,8 +138,26 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
               ),
             ],
           ),
+          IconButton(
+            tooltip: '今日打卡',
+            onPressed: () => _showTodayCheckinSheet(context),
+            icon: const Icon(
+              Icons.fact_check_outlined,
+              color: AppTheme.textPrimary,
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  void _showTodayCheckinSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const MedicationTodayCheckinSheet(),
     );
   }
 

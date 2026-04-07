@@ -2,12 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/medication_record.dart';
 import '../../domain/entities/medication_status.dart';
 import '../../domain/entities/medication_reminder.dart';
+import '../../domain/entities/medication_plan_aggregate.dart';
 import '../../domain/enums/medication_status_type.dart';
+import '../../domain/enums/medication_intake_status_type.dart';
 import '../../domain/repositories/medication_record_repository.dart';
 import '../../domain/repositories/medication_status_repository.dart';
 import '../../domain/repositories/medication_reminder_repository.dart';
+import '../../domain/repositories/medication_plan_repository.dart';
+import '../../domain/repositories/medication_intake_status_repository.dart';
 import 'core_providers.dart';
 import 'baby_providers.dart';
+import '../../domain/services/medication_slot_service.dart' as slot;
 
 // ============== MedicationRecord Providers ==============
 
@@ -577,4 +582,106 @@ final medicationComplianceProvider =
       final repository = ref.watch(medicationStatusRepositoryProvider);
       final statuses = await repository.getByMedicationId(medicationId);
       return calculateCompliance(statuses);
+    });
+
+// ============== 方案 C：按时间点打卡（最小接入） ==============
+
+/// 当前宝宝的用药计划聚合列表（方案 C）
+final medicationPlanAggregatesProvider =
+    FutureProvider<List<MedicationPlanAggregate>>((ref) async {
+      final babyId = ref.watch(currentBabyIdProvider);
+      if (babyId == null) return [];
+
+      final repository = ref.watch(medicationPlanRepositoryProvider);
+      return repository.listAggregatesByBabyId(babyId);
+    });
+
+/// 进行中的用药计划聚合（endDate 为空或 >= 今日）
+final activeMedicationPlanAggregatesProvider =
+    FutureProvider<List<MedicationPlanAggregate>>((ref) async {
+      final all = await ref.watch(medicationPlanAggregatesProvider.future);
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      return all.where((agg) {
+        final end = agg.plan.endDate;
+        return end == null ||
+            !DateTime(end.year, end.month, end.day).isBefore(todayDate);
+      }).toList();
+    });
+
+class TodayMedicationCheckinItem {
+  final String planId;
+  final String medicationName;
+  final String doseText;
+  final DateTime scheduledDate;
+  final String timeId;
+  final String timeOfDay;
+  final MedicationIntakeStatusType? status;
+
+  const TodayMedicationCheckinItem({
+    required this.planId,
+    required this.medicationName,
+    required this.doseText,
+    required this.scheduledDate,
+    required this.timeId,
+    required this.timeOfDay,
+    required this.status,
+  });
+}
+
+/// 今日所有应打卡槽位（按 active plans + 槽位计算），并附带当前状态（若已打卡）
+final todayMedicationCheckinItemsProvider =
+    FutureProvider<List<TodayMedicationCheckinItem>>((ref) async {
+      final activeAggs =
+          await ref.watch(activeMedicationPlanAggregatesProvider.future);
+      if (activeAggs.isEmpty) return [];
+
+      final intakeRepo = ref.watch(medicationIntakeStatusRepositoryProvider);
+      const svc = slot.MedicationSlotService();
+
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+
+      final items = <TodayMedicationCheckinItem>[];
+
+      for (final agg in activeAggs) {
+        final slots = svc.computeSlots(agg: agg, today: todayDate);
+        final todaySlots =
+            slots.where((s) => s.scheduledDate == todayDate).toList()
+              ..sort((a, b) => a.timeOfDay.compareTo(b.timeOfDay));
+
+        if (todaySlots.isEmpty) continue;
+
+        final statuses = await intakeRepo.listByPlanId(agg.plan.id);
+        final statusByKey = <String, MedicationIntakeStatusType>{};
+        for (final s in statuses) {
+          final key =
+              '${s.planId}|${svc.normalizeDate(s.scheduledDate).toIso8601String()}|${s.timeId}';
+          statusByKey[key] = s.status;
+        }
+
+        final doseText = '${agg.dose.amount}${agg.dose.unit}';
+
+        for (final s in todaySlots) {
+          items.add(
+            TodayMedicationCheckinItem(
+              planId: agg.plan.id,
+              medicationName: agg.plan.medicationName,
+              doseText: doseText,
+              scheduledDate: todayDate,
+              timeId: s.timeId,
+              timeOfDay: s.timeOfDay,
+              status: statusByKey[s.key],
+            ),
+          );
+        }
+      }
+
+      // 先按时间，再按药名
+      items.sort((a, b) {
+        final t = a.timeOfDay.compareTo(b.timeOfDay);
+        if (t != 0) return t;
+        return a.medicationName.compareTo(b.medicationName);
+      });
+      return items;
     });
