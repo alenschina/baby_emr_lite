@@ -49,18 +49,23 @@ final inactiveMedicationsProvider = FutureProvider<List<MedicationRecord>>((
   return repository.getInactive(currentId);
 });
 
-/// 今日用药提醒项
+/// 今日用药提醒项（方案 C：一条对应一个今日槽位）
+/// [medicationId] 与用药计划 id（planId）相同，保留旧字段名以兼容少量调用方。
 class TodayMedicationReminder {
   final String medicationId;
   final String medicationName;
   final String dosage;
   final String scheduledTime;
+  final String timeId;
+  final DateTime scheduledDate;
 
   const TodayMedicationReminder({
     required this.medicationId,
     required this.medicationName,
     required this.dosage,
     required this.scheduledTime,
+    required this.timeId,
+    required this.scheduledDate,
   });
 }
 
@@ -81,6 +86,8 @@ final todayMedicationRemindersProvider =
               medicationName: i.medicationName,
               dosage: i.doseText,
               scheduledTime: i.timeOfDay,
+              timeId: i.timeId,
+              scheduledDate: i.scheduledDate,
             ),
           )
           .toList()

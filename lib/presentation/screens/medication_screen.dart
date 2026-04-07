@@ -308,13 +308,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       );
     }
 
-    return FutureBuilder<List<double>>(
-      future: _calculateOverallPlanCompliance(ref, activePlans),
+    return FutureBuilder<double>(
+      future: _calculateOverallWeightedPlanCompliance(ref, activePlans),
       builder: (context, snapshot) {
-        final complianceRates = snapshot.data ?? [];
-        final overallRate = complianceRates.isEmpty
-            ? 0.0
-            : complianceRates.reduce((a, b) => a + b) / complianceRates.length;
+        final overallRate = snapshot.data ?? 0.0;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
@@ -368,7 +365,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      '基于当前用药计划（按时间点槽位）分析',
+                      '基于当前用药计划（按时间点槽位；总览按应服次数加权）',
                       style: TextStyle(
                         fontSize: AppTheme.fontSizeCaption,
                         color: AppTheme.textTertiary,
@@ -474,20 +471,22 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
   }
 
-  Future<List<double>> _calculateOverallPlanCompliance(
+  /// 各 active 计划的槽位加权：总已服 / 总应服（与简单平均各计划率相比更公平）
+  Future<double> _calculateOverallWeightedPlanCompliance(
     WidgetRef ref,
     List<MedicationPlanAggregate> plans,
   ) async {
-    final rates = <double>[];
+    var totalSlots = 0;
+    var takenSlots = 0;
     for (final agg in plans) {
       final compliance = await ref.read(
         medicationPlanSlotComplianceProvider(agg.plan.id).future,
       );
-      if (compliance.totalDays > 0) {
-        rates.add(compliance.complianceRate);
-      }
+      totalSlots += compliance.totalDays;
+      takenSlots += compliance.takenDays;
     }
-    return rates;
+    if (totalSlots <= 0) return 0.0;
+    return takenSlots / totalSlots;
   }
 
   void _showAddRecordSheet(BuildContext context) {
