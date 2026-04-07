@@ -9,6 +9,7 @@ import '../../data/repositories/medication_record_repository_impl.dart';
 import '../../data/repositories/medication_status_repository_impl.dart';
 import '../../data/repositories/medication_reminder_repository_impl.dart';
 import '../../data/repositories/medication_plan_repository_impl.dart';
+import '../../data/repositories/medication_intake_status_repository_impl.dart';
 import '../../domain/repositories/baby_repository.dart';
 import '../../domain/repositories/medical_record_repository.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
@@ -17,6 +18,7 @@ import '../../domain/repositories/medication_record_repository.dart';
 import '../../domain/repositories/medication_status_repository.dart';
 import '../../domain/repositories/medication_reminder_repository.dart';
 import '../../domain/repositories/medication_plan_repository.dart';
+import '../../domain/repositories/medication_intake_status_repository.dart';
 
 /// 加密服务 Provider
 final encryptionServiceProvider = Provider<EncryptionService>((ref) {
@@ -86,6 +88,13 @@ final medicationPlanRepositoryProvider = Provider<MedicationPlanRepository>((
   final storage = ref.watch(hiveStorageProvider);
   return MedicationPlanRepositoryImpl(storage);
 });
+
+/// 用药打卡仓库 Provider（方案 C）
+final medicationIntakeStatusRepositoryProvider =
+    Provider<MedicationIntakeStatusRepository>((ref) {
+      final storage = ref.watch(hiveStorageProvider);
+      return MedicationIntakeStatusRepositoryImpl(storage);
+    });
 
 /// 应用初始化 Provider
 final appInitializationProvider = FutureProvider<void>((ref) async {
