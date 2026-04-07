@@ -278,6 +278,8 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
           status: value,
         );
         ref.invalidate(todayMedicationCheckinItemsProvider);
+        ref.invalidate(todayMedicationRemindersProvider);
+        ref.invalidate(medicationPlanSlotComplianceProvider(item.planId));
       },
       labelStyle: TextStyle(
         fontSize: 12,

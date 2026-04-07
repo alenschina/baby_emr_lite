@@ -8,8 +8,6 @@ import '../../domain/enums/medication_intake_status_type.dart';
 import '../../domain/repositories/medication_record_repository.dart';
 import '../../domain/repositories/medication_status_repository.dart';
 import '../../domain/repositories/medication_reminder_repository.dart';
-import '../../domain/repositories/medication_plan_repository.dart';
-import '../../domain/repositories/medication_intake_status_repository.dart';
 import 'core_providers.dart';
 import 'baby_providers.dart';
 import '../../domain/services/medication_slot_service.dart' as slot;
@@ -65,48 +63,27 @@ class TodayMedicationReminder {
 }
 
 /// 今日用药提醒 Provider
-/// 监听用药记录变化，自动刷新提醒列表
+/// 基于方案 C：今日应服槽位中「尚未记录打卡」的项（与今日打卡 sheet 同源数据）
 final todayMedicationRemindersProvider =
     FutureProvider<List<TodayMedicationReminder>>((ref) async {
       final currentId = ref.watch(currentBabyIdProvider);
       if (currentId == null) return [];
 
-      // 监听用药记录变化以触发刷新
-      final _ = ref.watch(medicationRecordNotifierProvider);
+      final items = await ref.watch(todayMedicationCheckinItemsProvider.future);
+      final pending = items.where((i) => i.status == null).toList();
 
-      final repository = ref.watch(medicationRecordRepositoryProvider);
-      final statusRepository = ref.watch(medicationStatusRepositoryProvider);
-      final activeMedications = await repository.getActive(currentId);
-
-      final reminders = <TodayMedicationReminder>[];
-      final today = DateTime.now();
-      final todayDate = DateTime(today.year, today.month, today.day);
-
-      for (final medication in activeMedications) {
-        // 检查今天是否已有记录
-        final statuses = await statusRepository.getByMedicationId(
-          medication.id,
-        );
-        final hasTodayRecord = statuses.any((s) {
-          final sDate = DateTime(s.date.year, s.date.month, s.date.day);
-          return sDate.isAtSameMomentAs(todayDate);
-        });
-
-        // 如果今天没有记录，添加提醒
-        if (!hasTodayRecord) {
-          reminders.add(
-            TodayMedicationReminder(
-              medicationId: medication.id,
-              medicationName: medication.name,
-              dosage: medication.dosage,
-              scheduledTime: medication.scheduledTime ?? '09:00',
+      final reminders = pending
+          .map(
+            (i) => TodayMedicationReminder(
+              medicationId: i.planId,
+              medicationName: i.medicationName,
+              dosage: i.doseText,
+              scheduledTime: i.timeOfDay,
             ),
-          );
-        }
-      }
+          )
+          .toList()
+        ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
-      // 按时间排序
-      reminders.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
       return reminders;
     });
 
@@ -540,7 +517,7 @@ class MedicationCompliance {
   });
 }
 
-/// 计算用药依从性
+/// 计算用药依从性（旧：按天一条 MedicationStatus；保留给仍使用旧仓库的代码）
 MedicationCompliance calculateCompliance(List<MedicationStatus> statuses) {
   if (statuses.isEmpty) {
     return const MedicationCompliance(
@@ -573,7 +550,7 @@ MedicationCompliance calculateCompliance(List<MedicationStatus> statuses) {
   );
 }
 
-/// 用药依从性 Provider
+/// 用药依从性 Provider（旧 medicationId，按天记录）
 final medicationComplianceProvider =
     FutureProvider.family<MedicationCompliance, String>((
       ref,
@@ -582,6 +559,41 @@ final medicationComplianceProvider =
       final repository = ref.watch(medicationStatusRepositoryProvider);
       final statuses = await repository.getByMedicationId(medicationId);
       return calculateCompliance(statuses);
+    });
+
+/// 方案 C：按 planId，用「计划起至今所有槽位 + 打卡记录」计算依从性
+/// [MedicationCompliance.totalDays] 在此表示 **槽位总数**（非自然日数）
+final medicationPlanSlotComplianceProvider =
+    FutureProvider.family<MedicationCompliance, String>((ref, planId) async {
+      final planRepo = ref.watch(medicationPlanRepositoryProvider);
+      final agg = await planRepo.getAggregateById(planId);
+      if (agg == null) {
+        return const MedicationCompliance(
+          totalDays: 0,
+          takenDays: 0,
+          missedDays: 0,
+          skippedDays: 0,
+          complianceRate: 0,
+        );
+      }
+
+      final intakeRepo = ref.watch(medicationIntakeStatusRepositoryProvider);
+      const svc = slot.MedicationSlotService();
+
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+
+      final allSlots = svc.computeSlots(agg: agg, today: todayDate);
+      final statuses = await intakeRepo.listByPlanId(planId);
+      final slotResult = svc.computeCompliance(slots: allSlots, statuses: statuses);
+
+      return MedicationCompliance(
+        totalDays: slotResult.totalSlots,
+        takenDays: slotResult.takenSlots,
+        missedDays: slotResult.missedSlots,
+        skippedDays: slotResult.skippedSlots,
+        complianceRate: slotResult.complianceRate,
+      );
     });
 
 // ============== 方案 C：按时间点打卡（最小接入） ==============
