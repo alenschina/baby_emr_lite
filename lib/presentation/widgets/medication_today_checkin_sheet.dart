@@ -8,7 +8,15 @@ import '../providers/core_providers.dart';
 import 'glass_card.dart';
 
 class MedicationTodayCheckinSheet extends ConsumerWidget {
-  const MedicationTodayCheckinSheet({super.key});
+  /// 若设置，仅展示该用药计划今日的槽位（从卡片进入时可区分多条计划）
+  final String? filterPlanId;
+  final String? filterPlanName;
+
+  const MedicationTodayCheckinSheet({
+    super.key,
+    this.filterPlanId,
+    this.filterPlanName,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,19 +33,28 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _buildError(context, e.toString()),
         data: (items) {
+          final filtered = filterPlanId == null
+              ? items
+              : items.where((i) => i.planId == filterPlanId).toList();
+          final title = filterPlanId == null
+              ? '今日用药打卡'
+              : '今日打卡 · ${filterPlanName ?? '用药'}';
+
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    '今日用药打卡',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
-                      fontFamily: AppTheme.fontFamily,
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -49,11 +66,22 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
                   ),
                 ],
               ),
+              if (filterPlanId != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '仅显示本条计划的今日时间点',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textTertiary,
+                    fontFamily: AppTheme.fontFamily,
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
-              if (items.isEmpty)
-                _buildEmpty()
+              if (filtered.isEmpty)
+                _buildEmpty(singlePlan: filterPlanId != null)
               else
-                _buildList(context, ref, items),
+                _buildList(context, ref, filtered),
             ],
           );
         },
@@ -61,7 +89,7 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty({bool singlePlan = false}) {
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -79,10 +107,12 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              '今天暂无需要打卡的用药时间点',
-              style: TextStyle(
+              singlePlan
+                  ? '该计划今日无需打卡（无排期时间点或已全部记录）'
+                  : '今天暂无需要打卡的用药时间点',
+              style: const TextStyle(
                 fontSize: 14,
                 color: AppTheme.textSecondary,
                 fontFamily: AppTheme.fontFamily,

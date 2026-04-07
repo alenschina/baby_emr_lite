@@ -167,7 +167,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             ],
           ),
           IconButton(
-            tooltip: '今日打卡',
+            tooltip: '今日全部打卡（所有用药计划）',
             onPressed: () => _showTodayCheckinSheet(context),
             icon: const Icon(
               Icons.fact_check_outlined,
@@ -179,13 +179,20 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
   }
 
-  void _showTodayCheckinSheet(BuildContext context) {
+  void _showTodayCheckinSheet(
+    BuildContext context, {
+    String? filterPlanId,
+    String? filterPlanName,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const MedicationTodayCheckinSheet(),
+      builder: (context) => MedicationTodayCheckinSheet(
+        filterPlanId: filterPlanId,
+        filterPlanName: filterPlanName,
+      ),
     );
   }
 
@@ -232,6 +239,11 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
           onEdit: () => _showEditPlanSheet(context, agg),
           onDelete: () => _confirmDeletePlan(context, agg.plan.id),
           onEndPlan: () => _endPlan(context, agg.plan.id),
+          onOpenTodayCheckin: () => _showTodayCheckinSheet(
+            context,
+            filterPlanId: agg.plan.id,
+            filterPlanName: agg.plan.medicationName,
+          ),
         );
       },
     );

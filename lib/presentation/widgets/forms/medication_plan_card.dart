@@ -25,6 +25,8 @@ class MedicationPlanCard extends ConsumerWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onEndPlan;
+  /// 打开「仅本计划」的今日打卡；多条计划时与右上角「全部」区分
+  final VoidCallback? onOpenTodayCheckin;
 
   const MedicationPlanCard({
     super.key,
@@ -32,6 +34,7 @@ class MedicationPlanCard extends ConsumerWidget {
     this.onEdit,
     this.onDelete,
     this.onEndPlan,
+    this.onOpenTodayCheckin,
   });
 
   bool _isActiveOnDate(DateTime todayDate) {
@@ -54,6 +57,8 @@ class MedicationPlanCard extends ConsumerWidget {
     final complianceAsync = ref.watch(
       medicationPlanSlotComplianceProvider(aggregate.plan.id),
     );
+
+    final checkinAsync = ref.watch(todayMedicationCheckinItemsProvider);
 
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -203,6 +208,48 @@ class MedicationPlanCard extends ConsumerWidget {
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+          if (isActive && onOpenTodayCheckin != null) ...[
+            const SizedBox(height: 12),
+            checkinAsync.when(
+              data: (items) {
+                final mine =
+                    items.where((i) => i.planId == aggregate.plan.id).toList();
+                final pending =
+                    mine.where((i) => i.status == null).length;
+                return SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: onOpenTodayCheckin,
+                    icon: const Icon(Icons.fact_check_outlined, size: 20),
+                    label: Text(
+                      pending > 0
+                          ? '今日打卡（待完成 $pending 次）'
+                          : '今日打卡',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontFamily: AppTheme.fontFamily,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.brandPrimary,
+                      side: BorderSide(
+                        color: AppTheme.brandPrimary.withOpacity(0.45),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
