@@ -123,9 +123,13 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                 ],
               ),
             ),
-            // 右上角添加按钮
+            // 右上角：添加用药计划 + 今日全部打卡（同 Glass 样式、纵向排列）
             AdaptiveFloatingActionButton(
               onPressed: () => _showAddRecordSheet(context),
+              tooltip: '添加用药计划',
+              secondaryOnPressed: () => _showTodayCheckinSheet(context),
+              secondaryIcon: Icons.fact_check_outlined,
+              secondaryTooltip: '今日全部打卡（所有用药计划）',
             ),
           ],
         ),
@@ -134,45 +138,33 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
   }
 
   Widget _buildHeader(AsyncValue currentBabyAsync) {
+    // 右侧留给顶部横向两颗玻璃图标（打卡 + 添加），避免标题与 Stack 重叠
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.fromLTRB(20, 16, 108, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '用药管理',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                  fontFamily: AppTheme.fontFamily,
-                ),
-              ),
-              const SizedBox(height: 4),
-              currentBabyAsync.when(
-                data: (baby) => Text(
-                  baby != null ? '${baby.name}的用药计划' : '管理宝宝用药',
-                  style: TextStyle(
-                    fontSize: AppTheme.fontSizeCaption,
-                    color: AppTheme.textSecondary,
-                    fontFamily: AppTheme.fontFamily,
-                  ),
-                ),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-            ],
-          ),
-          IconButton(
-            tooltip: '今日全部打卡（所有用药计划）',
-            onPressed: () => _showTodayCheckinSheet(context),
-            icon: const Icon(
-              Icons.fact_check_outlined,
+          Text(
+            '用药管理',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
+              fontFamily: AppTheme.fontFamily,
             ),
+          ),
+          const SizedBox(height: 4),
+          currentBabyAsync.when(
+            data: (baby) => Text(
+              baby != null ? '${baby.name}的用药计划' : '管理宝宝用药',
+              style: TextStyle(
+                fontSize: AppTheme.fontSizeCaption,
+                color: AppTheme.textSecondary,
+                fontFamily: AppTheme.fontFamily,
+              ),
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),
