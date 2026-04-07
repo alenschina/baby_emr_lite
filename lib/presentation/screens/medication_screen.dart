@@ -52,6 +52,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             // 主要内容
             SafeArea(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 顶部标题栏
                   _buildHeader(currentBabyAsync),
@@ -139,7 +140,9 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
   Widget _buildHeader(AsyncValue currentBabyAsync) {
     // 右侧留给顶部横向两颗玻璃图标（打卡 + 添加），避免标题与 Stack 重叠
+    // 须占满行宽：外层 Column 默认会按子节点宽度居中窄 Container，导致标题看起来像「居中」
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 16, 108, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
