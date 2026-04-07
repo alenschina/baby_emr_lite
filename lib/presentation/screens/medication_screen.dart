@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/medication_providers.dart';
 import '../providers/baby_providers.dart';
+import '../utils/baby_record_guard.dart';
 import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/medication_record_form.dart';
@@ -439,6 +440,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
   }
 
   void _showAddRecordSheet(BuildContext context) {
+    if (!ensureCurrentBabyForNewRecord(ref, context)) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

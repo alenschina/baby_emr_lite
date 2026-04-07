@@ -6,6 +6,7 @@ import '../../../domain/entities/medication_record.dart';
 import '../../../domain/entities/medication_status.dart';
 import '../../../domain/enums/medication_status_type.dart';
 import '../../providers/medication_providers.dart';
+import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
 /// 用药记录表单组件
@@ -455,6 +456,7 @@ class _MedicationRecordFormState extends ConsumerState<MedicationRecordForm> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!isEditing && !ensureCurrentBabyForNewRecord(ref, context)) return;
 
     setState(() => _isLoading = true);
 
@@ -463,7 +465,7 @@ class _MedicationRecordFormState extends ConsumerState<MedicationRecordForm> {
       final stock = int.parse(_stockController.text.trim());
 
       if (isEditing) {
-        await notifier.update(
+        final updated = await notifier.update(
           widget.existingRecord!.id,
           name: _nameController.text.trim(),
           dosage: _dosageController.text.trim(),
@@ -480,12 +482,19 @@ class _MedicationRecordFormState extends ConsumerState<MedicationRecordForm> {
               : null,
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('用药计划已更新')));
+          if (updated != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('用药计划已更新')));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (updated == null) return;
       } else {
-        await notifier.create(
+        final created = await notifier.create(
           name: _nameController.text.trim(),
           dosage: _dosageController.text.trim(),
           frequency: _frequencyController.text.trim(),
@@ -501,10 +510,17 @@ class _MedicationRecordFormState extends ConsumerState<MedicationRecordForm> {
               : null,
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('用药计划添加成功')));
+          if (created != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('用药计划添加成功')));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (created == null) return;
       }
 
       widget.onSuccess?.call();

@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../domain/entities/medical_record.dart';
 import '../providers/medical_record_providers.dart';
 import '../providers/baby_providers.dart';
+import '../utils/baby_record_guard.dart';
 import '../widgets/forms/medical_record_form.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/medical_record_filter_panel.dart';
@@ -414,6 +415,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
   }
 
   void _showAddRecordSheet(BuildContext context) {
+    if (!ensureCurrentBabyForNewRecord(ref, context)) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

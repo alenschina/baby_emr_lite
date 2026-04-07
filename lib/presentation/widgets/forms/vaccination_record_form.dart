@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/vaccination_record.dart';
 import '../../providers/vaccination_record_providers.dart';
+import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
 /// 疫苗接种表单组件
@@ -324,6 +325,7 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!isEditing && !ensureCurrentBabyForNewRecord(ref, context)) return;
 
     setState(() => _isLoading = true);
 
@@ -331,7 +333,7 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
       final notifier = ref.read(vaccinationRecordNotifierProvider.notifier);
 
       if (isEditing) {
-        await notifier.update(
+        final updated = await notifier.update(
           widget.existingRecord!.id,
           vaccineName: _vaccineNameController.text.trim(),
           scheduledDate: _scheduledDate,
@@ -345,12 +347,19 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
           isCompleted: _actualDate != null,
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('疫苗记录已更新')));
+          if (updated != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('疫苗记录已更新')));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (updated == null) return;
       } else {
-        await notifier.create(
+        final created = await notifier.create(
           vaccineName: _vaccineNameController.text.trim(),
           scheduledDate: _scheduledDate,
           actualDate: _actualDate,
@@ -362,11 +371,19 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
               : null,
         );
         if (mounted) {
-          final message = _actualDate != null ? '疫苗接种记录添加成功' : '疫苗计划添加成功';
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(message)));
+          if (created != null) {
+            final message =
+                _actualDate != null ? '疫苗接种记录添加成功' : '疫苗计划添加成功';
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (created == null) return;
       }
 
       widget.onSuccess?.call();

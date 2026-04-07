@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/growth_data.dart';
 import '../../providers/growth_data_providers.dart';
+import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
 /// 生长发育表单组件
@@ -332,6 +333,7 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!isEditing && !ensureCurrentBabyForNewRecord(ref, context)) return;
 
     setState(() => _isLoading = true);
 
@@ -341,7 +343,7 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
       final weight = double.parse(_weightController.text.trim());
 
       if (isEditing) {
-        await notifier.update(
+        final updated = await notifier.update(
           widget.existingRecord!.id,
           measurementDate: _selectedDate,
           height: height,
@@ -350,8 +352,16 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
               ? _notesController.text.trim()
               : null,
         );
+        if (updated == null) {
+          if (mounted) {
+            ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+              const SnackBar(content: Text('保存失败，请重试')),
+            );
+          }
+          return;
+        }
       } else {
-        await notifier.create(
+        final created = await notifier.create(
           measurementDate: _selectedDate,
           height: height,
           weight: weight,
@@ -359,6 +369,14 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
               ? _notesController.text.trim()
               : null,
         );
+        if (created == null) {
+          if (mounted) {
+            ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+              const SnackBar(content: Text('保存失败，请重试')),
+            );
+          }
+          return;
+        }
       }
 
       // 先校验 mounted，再获取 messenger 并关闭 bottom sheet，避免在 pop 后继续使用已失效 context

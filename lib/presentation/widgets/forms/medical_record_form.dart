@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/medical_record.dart';
 import '../../providers/medical_record_providers.dart';
+import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
 /// 病例记录表单组件
@@ -311,6 +312,7 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!isEditing && !ensureCurrentBabyForNewRecord(ref, context)) return;
 
     setState(() => _isLoading = true);
 
@@ -318,7 +320,7 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
       final notifier = ref.read(medicalRecordNotifierProvider.notifier);
 
       if (isEditing) {
-        await notifier.update(
+        final updated = await notifier.update(
           widget.existingRecord!.id,
           visitDate: _selectedDate,
           symptoms: _symptomsController.text.trim(),
@@ -329,12 +331,19 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           notes: _notesController.text.trim(),
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('病例记录已更新')));
+          if (updated != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('病例记录已更新')));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (updated == null) return;
       } else {
-        await notifier.create(
+        final created = await notifier.create(
           visitDate: _selectedDate,
           symptoms: _symptomsController.text.trim(),
           diagnosis: _diagnosisController.text.trim(),
@@ -344,10 +353,17 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           notes: _notesController.text.trim(),
         );
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('病例记录添加成功')));
+          if (created != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('病例记录添加成功')));
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+          }
         }
+        if (created == null) return;
       }
 
       widget.onSuccess?.call();

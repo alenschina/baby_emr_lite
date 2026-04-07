@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../domain/entities/growth_data.dart';
 import '../providers/growth_data_providers.dart';
 import '../providers/baby_providers.dart';
+import '../utils/baby_record_guard.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/growth_data_form.dart';
 import '../widgets/adaptive_fab.dart';
@@ -453,6 +454,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
   }
 
   void _showAddRecordSheet(BuildContext context) {
+    if (!ensureCurrentBabyForNewRecord(ref, context)) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/vaccination_record_providers.dart';
 import '../providers/baby_providers.dart';
+import '../utils/baby_record_guard.dart';
 import '../widgets/forms/vaccination_record_form.dart';
 import '../widgets/adaptive_fab.dart';
 
@@ -212,6 +213,7 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
   }
 
   void _showAddRecordSheet(BuildContext context) {
+    if (!ensureCurrentBabyForNewRecord(ref, context)) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

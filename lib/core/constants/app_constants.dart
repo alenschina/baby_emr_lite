@@ -30,6 +30,9 @@ class AppConstants {
   // 默认单位
   static const String defaultMedicationUnit = '片';
 
+  /// 无宝宝档案时尝试添加病例、疫苗、生长、用药等记录时的提示
+  static const String addBabyBeforeRecordMessage = '请先添加宝宝档案，再记录相关信息';
+
   // 日期格式
   static const String dateFormat = 'yyyy-MM-dd';
   static const String dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';
