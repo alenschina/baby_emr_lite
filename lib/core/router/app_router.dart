@@ -41,7 +41,13 @@ class AppRouter {
             GoRoute(
               path: '/medication',
               name: 'medication',
-              builder: (context, state) => const MedicationScreen(),
+              builder: (context, state) {
+                final q = state.uri.queryParameters;
+                return MedicationScreen(
+                  initialCheckInPlanId: q['checkinPlanId'],
+                  initialCheckInPlanName: q['checkinPlanName'],
+                );
+              },
             ),
             GoRoute(
               path: '/vaccination',

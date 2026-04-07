@@ -14,8 +14,17 @@ import '../widgets/medication_today_checkin_sheet.dart';
 
 /// 用药管理屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
+///
+/// [initialCheckInPlanId]：从首页「今日提醒」进入时由路由 query 传入，首帧打开对应计划的打卡 sheet。
 class MedicationScreen extends ConsumerStatefulWidget {
-  const MedicationScreen({super.key});
+  const MedicationScreen({
+    super.key,
+    this.initialCheckInPlanId,
+    this.initialCheckInPlanName,
+  });
+
+  final String? initialCheckInPlanId;
+  final String? initialCheckInPlanName;
 
   @override
   ConsumerState<MedicationScreen> createState() => _MedicationScreenState();
@@ -25,10 +34,52 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  String? _pendingCheckInPlanId;
+  String? _pendingCheckInPlanName;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _scheduleCheckInFromRoute(
+      widget.initialCheckInPlanId,
+      widget.initialCheckInPlanName,
+    );
+  }
+
+  @override
+  void didUpdateWidget(MedicationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCheckInPlanId != oldWidget.initialCheckInPlanId ||
+        widget.initialCheckInPlanName != oldWidget.initialCheckInPlanName) {
+      _scheduleCheckInFromRoute(
+        widget.initialCheckInPlanId,
+        widget.initialCheckInPlanName,
+      );
+    }
+  }
+
+  void _scheduleCheckInFromRoute(String? planId, String? planName) {
+    final pid = planId?.trim();
+    if (pid == null || pid.isEmpty) return;
+    _pendingCheckInPlanId = pid;
+    _pendingCheckInPlanName = planName;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingCheckInSheet();
+    });
+  }
+
+  void _openPendingCheckInSheet() {
+    final pid = _pendingCheckInPlanId;
+    final pname = _pendingCheckInPlanName;
+    if (!mounted || pid == null || pid.isEmpty) return;
+    _pendingCheckInPlanId = null;
+    _pendingCheckInPlanName = null;
+    _showTodayCheckinSheet(
+      context,
+      filterPlanId: pid,
+      filterPlanName: pname,
+    );
   }
 
   @override

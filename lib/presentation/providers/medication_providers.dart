@@ -49,21 +49,20 @@ final inactiveMedicationsProvider = FutureProvider<List<MedicationRecord>>((
   return repository.getInactive(currentId);
 });
 
-/// 今日用药提醒项（方案 C：一条对应一个今日槽位）
-/// [medicationId] 与用药计划 id（planId）相同，保留旧字段名以兼容少量调用方。
+/// 今日用药提醒项（Task 8 / 方案 C：一条对应一个今日槽位，数据来自今日打卡同源）
 class TodayMedicationReminder {
-  final String medicationId;
+  final String planId;
   final String medicationName;
-  final String dosage;
-  final String scheduledTime;
+  final String doseText;
+  final String timeOfDay;
   final String timeId;
   final DateTime scheduledDate;
 
   const TodayMedicationReminder({
-    required this.medicationId,
+    required this.planId,
     required this.medicationName,
-    required this.dosage,
-    required this.scheduledTime,
+    required this.doseText,
+    required this.timeOfDay,
     required this.timeId,
     required this.scheduledDate,
   });
@@ -82,16 +81,22 @@ final todayMedicationRemindersProvider =
       final reminders = pending
           .map(
             (i) => TodayMedicationReminder(
-              medicationId: i.planId,
+              planId: i.planId,
               medicationName: i.medicationName,
-              dosage: i.doseText,
-              scheduledTime: i.timeOfDay,
+              doseText: i.doseText,
+              timeOfDay: i.timeOfDay,
               timeId: i.timeId,
               scheduledDate: i.scheduledDate,
             ),
           )
           .toList()
-        ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+        ..sort((a, b) {
+          final t = a.timeOfDay.compareTo(b.timeOfDay);
+          if (t != 0) return t;
+          final n = a.medicationName.compareTo(b.medicationName);
+          if (n != 0) return n;
+          return a.timeId.compareTo(b.timeId);
+        });
 
       return reminders;
     });

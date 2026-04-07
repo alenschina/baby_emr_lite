@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../providers/medication_providers.dart';
 import '../providers/vaccination_record_providers.dart';
@@ -72,7 +73,15 @@ class TodayRemindersSection extends ConsumerWidget {
                       (reminder) => _buildMedicationReminderItem(
                         context,
                         reminder,
-                        () => context.go('/medication'),
+                        () => context.go(
+                          Uri(
+                            path: RoutePaths.medication,
+                            queryParameters: {
+                              'checkinPlanId': reminder.planId,
+                              'checkinPlanName': reminder.medicationName,
+                            },
+                          ).toString(),
+                        ),
                       ),
                     ),
 
@@ -152,7 +161,7 @@ class TodayRemindersSection extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${reminder.dosage} · ${reminder.scheduledTime}',
+                    '今日 ${reminder.timeOfDay} · 每次 ${reminder.doseText} · 待打卡',
                     style: const TextStyle(
                       fontSize: AppTheme.fontSizeCaption,
                       color: AppTheme.textSecondary,
