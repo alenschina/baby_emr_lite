@@ -32,6 +32,9 @@ ehthumbs.db
 # VS Code
 .vscode/
 
+# Git worktrees (local)
+.worktrees/
+
 # Xcode (user-specific data)
 **/*.xcuserstate
 **/*.xcuserdatad
