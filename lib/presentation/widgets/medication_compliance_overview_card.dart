@@ -17,7 +17,8 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
   final bool isLoading;
   final MedicationCompliance? aggregate;
 
-  static const double _chartSize = 208;
+  /// 环形图区域边长（较初版缩小 15%，减轻与周边文案重叠）
+  static const double _chartSize = 176.8;
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +159,8 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
               _TierBadge(label: tier.label, color: tier.color, light: tier.light),
             ],
           ),
-          const SizedBox(height: 12),
+          // 与圆环之间留出足够垂直间距，避免标题区与弧顶视觉挤压
+          const SizedBox(height: 24),
           SizedBox(
             height: _chartSize,
             child: Stack(
@@ -185,8 +187,8 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
                 PieChart(
                   PieChartData(
                     startDegreeOffset: -90,
-                    sectionsSpace: 3,
-                    centerSpaceRadius: 64,
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 54.4,
                     sections: sections,
                     pieTouchData: PieTouchData(enabled: false),
                   ),
@@ -201,7 +203,7 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 34,
+                        fontSize: 29,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
                         color: AppTheme.textPrimary,
@@ -225,7 +227,8 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 6),
+          // 圆环底部与图例之间的垂直呼吸空间
+          const SizedBox(height: 20),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -293,7 +296,7 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
     required int skipped,
     required int pending,
   }) {
-    const outer = 52.0;
+    const outer = 44.2;
     final List<PieChartSectionData> list = [];
 
     void add(double v, Color color) {
