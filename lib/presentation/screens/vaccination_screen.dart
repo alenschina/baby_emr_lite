@@ -228,7 +228,10 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result != null ? '已标记为完成' : '操作失败')),
+        SnackBar(
+          duration: AppTheme.snackBarDisplayDuration,
+          content: Text(result != null ? '已标记为完成' : '操作失败'),
+        ),
       );
     }
   }
@@ -258,9 +261,12 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
           .read(vaccinationRecordNotifierProvider.notifier)
           .delete(id);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text(success ? '记录已删除' : '删除失败'),
+          ),
+        );
       }
     }
   }

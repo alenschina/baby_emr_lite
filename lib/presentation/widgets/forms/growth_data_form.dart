@@ -355,7 +355,10 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
         if (updated == null) {
           if (mounted) {
             ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-              const SnackBar(content: Text('保存失败，请重试')),
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
             );
           }
           return;
@@ -372,7 +375,10 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
         if (created == null) {
           if (mounted) {
             ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-              const SnackBar(content: Text('保存失败，请重试')),
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
             );
           }
           return;
@@ -386,7 +392,10 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
 
       widget.onSuccess?.call();
       messenger?.showSnackBar(
-        SnackBar(content: Text(isEditing ? '生长记录已更新' : '生长记录添加成功')),
+        SnackBar(
+          duration: AppTheme.snackBarDisplayDuration,
+          content: Text(isEditing ? '生长记录已更新' : '生长记录添加成功'),
+        ),
       );
 
       // 延迟到下一帧关闭，避免与当前导航栈变更冲突导致 Navigator lock
@@ -395,9 +404,12 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('操作失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text('操作失败: $e'),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -460,9 +460,12 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
           .read(medicalRecordNotifierProvider.notifier)
           .delete(id);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text(success ? '记录已删除' : '删除失败'),
+          ),
+        );
       }
     }
   }

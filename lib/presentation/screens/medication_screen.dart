@@ -594,7 +594,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
           .endPlan(planId, DateTime.now());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ok ? '用药计划已结束' : '操作失败')),
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text(ok ? '用药计划已结束' : '操作失败'),
+          ),
         );
       }
     }
@@ -625,9 +628,12 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
           .read(medicationPlanNotifierProvider.notifier)
           .deletePlan(planId);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(success ? '计划已删除' : '删除失败')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text(success ? '计划已删除' : '删除失败'),
+          ),
+        );
       }
     }
   }

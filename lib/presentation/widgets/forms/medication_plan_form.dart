@@ -573,7 +573,10 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
       final n = int.tryParse(_intervalController.text.trim());
       if (n == null || n < 1) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请填写有效的间隔数值')),
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: const Text('请填写有效的间隔数值'),
+          ),
         );
         return;
       }
@@ -585,7 +588,12 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
     if (babyId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('请先选择宝宝')));
+      ).showSnackBar(
+        SnackBar(
+          duration: AppTheme.snackBarDisplayDuration,
+          content: const Text('请先选择宝宝'),
+        ),
+      );
       return;
     }
 
@@ -620,6 +628,7 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
       if (agg != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
             content: Text(isEditing ? '用药计划已更新' : '用药计划已添加'),
           ),
         );
@@ -628,13 +637,23 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
       } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+        ).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: const Text('保存失败，请重试'),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('操作失败: $e')));
+        ).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text('操作失败: $e'),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

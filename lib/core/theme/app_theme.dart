@@ -93,6 +93,12 @@ class AppTheme {
   static const double listItemSpacing = 12;
   static const double listItemSpacingLarge = 16;
 
+  /// SnackBar（floating）相对 M3 默认 `insetPadding.bottom`(10) 额外上移的留白（像素）。
+  static const double snackBarExtraBottomInset = 2;
+
+  /// SnackBar 展示时长（框架默认 4s，此处缩短以便快速消失）。
+  static const Duration snackBarDisplayDuration = Duration(seconds: 1);
+
   // ==================== 圆角规范 ====================
   /// 主要卡片 rounded-3xl
   static const double radiusCard = 24;
@@ -515,6 +521,17 @@ class AppTheme {
         fontSize: fontSizeMicro,
         fontWeight: FontWeight.w500,
         fontFamily: fontFamily,
+      ),
+    ),
+
+    // SnackBar：floating + 略增底部 inset，深色条相对底栏再上移 2px，减轻叠边
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      insetPadding: EdgeInsets.fromLTRB(
+        15,
+        5,
+        15,
+        10 + snackBarExtraBottomInset,
       ),
     ),
 

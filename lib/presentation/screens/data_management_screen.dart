@@ -335,9 +335,12 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
               ref.read(babyNotifierProvider.notifier).setCurrentBaby(babyId);
               ref.read(currentBabyIdProvider.notifier).state = babyId;
               Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('已切换宝宝')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: AppTheme.snackBarDisplayDuration,
+                  content: const Text('已切换宝宝'),
+                ),
+              );
             },
             child: const Text('确定'),
           ),
@@ -366,9 +369,12 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
             onPressed: () {
               ref.read(babyNotifierProvider.notifier).deleteBaby(babyId);
               Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('"$babyName" 已删除')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: AppTheme.snackBarDisplayDuration,
+                  content: Text('"$babyName" 已删除'),
+                ),
+              );
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.error),
             child: const Text('删除'),
@@ -387,15 +393,21 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
       await backupService.exportAndShare();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('备份文件已生成')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: const Text('备份文件已生成'),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text('导出失败: $e'),
+          ),
+        );
       }
     }
   }

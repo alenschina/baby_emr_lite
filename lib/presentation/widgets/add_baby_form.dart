@@ -210,7 +210,12 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
       if (_selectedBirthDate == null) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('请选择出生日期')));
+        ).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: const Text('请选择出生日期'),
+          ),
+        );
         return;
       }
 
@@ -232,13 +237,23 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
 
         if (mounted) {
           final messenger = ScaffoldMessenger.maybeOf(context);
-          messenger?.showSnackBar(const SnackBar(content: Text('宝宝添加成功')));
+          messenger?.showSnackBar(
+            SnackBar(
+              duration: AppTheme.snackBarDisplayDuration,
+              content: const Text('宝宝添加成功'),
+            ),
+          );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('添加失败: $e')));
+          ).showSnackBar(
+            SnackBar(
+              duration: AppTheme.snackBarDisplayDuration,
+              content: Text('添加失败: $e'),
+            ),
+          );
         }
       }
     }

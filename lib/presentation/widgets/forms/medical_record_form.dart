@@ -334,11 +334,21 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           if (updated != null) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('病例记录已更新')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('病例记录已更新'),
+              ),
+            );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
+            );
           }
         }
         if (updated == null) return;
@@ -356,11 +366,21 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           if (created != null) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('病例记录添加成功')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('病例记录添加成功'),
+              ),
+            );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
+            );
           }
         }
         if (created == null) return;
@@ -372,7 +392,12 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('操作失败: $e')));
+        ).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text('操作失败: $e'),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

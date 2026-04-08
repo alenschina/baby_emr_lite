@@ -351,11 +351,21 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
           if (updated != null) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('疫苗记录已更新')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('疫苗记录已更新'),
+              ),
+            );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
+            );
           }
         }
         if (updated == null) return;
@@ -377,11 +387,21 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
                 _actualDate != null ? '疫苗接种记录添加成功' : '疫苗计划添加成功';
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: Text(message),
+              ),
+            );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('保存失败，请重试')));
+            ).showSnackBar(
+              SnackBar(
+                duration: AppTheme.snackBarDisplayDuration,
+                content: const Text('保存失败，请重试'),
+              ),
+            );
           }
         }
         if (created == null) return;
@@ -393,7 +413,12 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('操作失败: $e')));
+        ).showSnackBar(
+          SnackBar(
+            duration: AppTheme.snackBarDisplayDuration,
+            content: Text('操作失败: $e'),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
