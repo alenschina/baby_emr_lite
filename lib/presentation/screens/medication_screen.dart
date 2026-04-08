@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../domain/entities/medication_plan_aggregate.dart';
 import '../providers/medication_providers.dart';
 import '../providers/baby_providers.dart';
 import '../utils/baby_record_guard.dart';
 import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/forms/medication_record_form.dart';
+import '../widgets/forms/medication_plan_card.dart';
+import '../widgets/forms/medication_plan_form.dart';
 import '../widgets/adaptive_fab.dart';
+import '../widgets/medication_today_checkin_sheet.dart';
 
 /// 用药管理屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
+///
+/// [initialCheckInPlanId]：从首页「今日提醒」进入时由路由 query 传入，首帧打开对应计划的打卡 sheet。
 class MedicationScreen extends ConsumerStatefulWidget {
-  const MedicationScreen({super.key});
+  const MedicationScreen({
+    super.key,
+    this.initialCheckInPlanId,
+    this.initialCheckInPlanName,
+  });
+
+  final String? initialCheckInPlanId;
+  final String? initialCheckInPlanName;
 
   @override
   ConsumerState<MedicationScreen> createState() => _MedicationScreenState();
@@ -22,10 +34,52 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  String? _pendingCheckInPlanId;
+  String? _pendingCheckInPlanName;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _scheduleCheckInFromRoute(
+      widget.initialCheckInPlanId,
+      widget.initialCheckInPlanName,
+    );
+  }
+
+  @override
+  void didUpdateWidget(MedicationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCheckInPlanId != oldWidget.initialCheckInPlanId ||
+        widget.initialCheckInPlanName != oldWidget.initialCheckInPlanName) {
+      _scheduleCheckInFromRoute(
+        widget.initialCheckInPlanId,
+        widget.initialCheckInPlanName,
+      );
+    }
+  }
+
+  void _scheduleCheckInFromRoute(String? planId, String? planName) {
+    final pid = planId?.trim();
+    if (pid == null || pid.isEmpty) return;
+    _pendingCheckInPlanId = pid;
+    _pendingCheckInPlanName = planName;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openPendingCheckInSheet();
+    });
+  }
+
+  void _openPendingCheckInSheet() {
+    final pid = _pendingCheckInPlanId;
+    final pname = _pendingCheckInPlanName;
+    if (!mounted || pid == null || pid.isEmpty) return;
+    _pendingCheckInPlanId = null;
+    _pendingCheckInPlanName = null;
+    _showTodayCheckinSheet(
+      context,
+      filterPlanId: pid,
+      filterPlanName: pname,
+    );
   }
 
   @override
@@ -36,7 +90,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
   @override
   Widget build(BuildContext context) {
-    final recordsAsync = ref.watch(medicationRecordNotifierProvider);
+    final plansAsync = ref.watch(medicationPlanNotifierProvider);
     final currentBabyAsync = ref.watch(currentBabyProvider);
 
     return Scaffold(
@@ -49,6 +103,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             // 主要内容
             SafeArea(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 顶部标题栏
                   _buildHeader(currentBabyAsync),
@@ -60,24 +115,50 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
                   // Tab 内容
                   Expanded(
-                    child: recordsAsync.when(
-                      data: (records) {
-                        final activeRecords = records
-                            .where((r) => r.isActive)
-                            .toList();
-                        final inactiveRecords = records
-                            .where((r) => !r.isActive)
-                            .toList();
+                    child: plansAsync.when(
+                      data: (plans) {
+                        final now = DateTime.now();
+                        final todayDate = DateTime(now.year, now.month, now.day);
+                        bool isActivePlan(MedicationPlanAggregate a) {
+                          final end = a.plan.endDate;
+                          if (end == null) return true;
+                          final endD = DateTime(end.year, end.month, end.day);
+                          return !endD.isBefore(todayDate);
+                        }
+
+                        final activePlans =
+                            plans.where(isActivePlan).toList();
+                        final endedPlans =
+                            plans.where((a) => !isActivePlan(a)).toList();
 
                         return TabBarView(
                           controller: _tabController,
                           children: [
                             // 当前用药
-                            _buildCurrentMedications(activeRecords),
+                            _buildCurrentMedications(context, activePlans),
                             // 用药历史
-                            _buildHistoryMedications(inactiveRecords),
-                            // 依从性统计
-                            _buildComplianceStats(activeRecords),
+                            _buildHistoryMedications(context, endedPlans),
+                            // 依从性统计（方案 C：按 plan 槽位）
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final plansAsync = ref.watch(
+                                  activeMedicationPlanAggregatesProvider,
+                                );
+                                return plansAsync.when(
+                                  data: (plans) =>
+                                      _buildPlanComplianceStats(ref, plans),
+                                  loading: () => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  error: (e, _) => Center(
+                                    child: Text(
+                                      '加载失败: $e',
+                                      style: TextStyle(color: AppTheme.error),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         );
                       },
@@ -94,9 +175,13 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                 ],
               ),
             ),
-            // 右上角添加按钮
+            // 右上角：添加用药计划 + 今日全部打卡（同 Glass 样式、纵向排列）
             AdaptiveFloatingActionButton(
               onPressed: () => _showAddRecordSheet(context),
+              tooltip: '添加用药计划',
+              secondaryOnPressed: () => _showTodayCheckinSheet(context),
+              secondaryIcon: Icons.fact_check_outlined,
+              secondaryTooltip: '今日全部打卡（所有用药计划）',
             ),
           ],
         ),
@@ -105,45 +190,63 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
   }
 
   Widget _buildHeader(AsyncValue currentBabyAsync) {
+    // 右侧留给顶部横向两颗玻璃图标（打卡 + 添加），避免标题与 Stack 重叠
+    // 须占满行宽：外层 Column 默认会按子节点宽度居中窄 Container，导致标题看起来像「居中」
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 16, 108, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '用药管理',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                  fontFamily: AppTheme.fontFamily,
-                ),
+          Text(
+            '用药管理',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+              fontFamily: AppTheme.fontFamily,
+            ),
+          ),
+          const SizedBox(height: 4),
+          currentBabyAsync.when(
+            data: (baby) => Text(
+              baby != null ? '${baby.name}的用药计划' : '管理宝宝用药',
+              style: TextStyle(
+                fontSize: AppTheme.fontSizeCaption,
+                color: AppTheme.textSecondary,
+                fontFamily: AppTheme.fontFamily,
               ),
-              const SizedBox(height: 4),
-              currentBabyAsync.when(
-                data: (baby) => Text(
-                  baby != null ? '${baby.name}的用药计划' : '管理宝宝用药',
-                  style: TextStyle(
-                    fontSize: AppTheme.fontSizeCaption,
-                    color: AppTheme.textSecondary,
-                    fontFamily: AppTheme.fontFamily,
-                  ),
-                ),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-            ],
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentMedications(List records) {
-    if (records.isEmpty) {
+  void _showTodayCheckinSheet(
+    BuildContext context, {
+    String? filterPlanId,
+    String? filterPlanName,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MedicationTodayCheckinSheet(
+        filterPlanId: filterPlanId,
+        filterPlanName: filterPlanName,
+      ),
+    );
+  }
+
+  Widget _buildCurrentMedications(
+    BuildContext context,
+    List<MedicationPlanAggregate> plans,
+  ) {
+    if (plans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -160,7 +263,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '点击右上角按钮添加记录',
+              '点击右上角按钮添加用药计划',
               style: TextStyle(
                 fontSize: AppTheme.fontSizeCaption,
                 color: AppTheme.textTertiary,
@@ -174,21 +277,29 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: records.length,
+      itemCount: plans.length,
       itemBuilder: (context, index) {
-        final record = records[index];
-        return MedicationRecordCard(
-          record: record,
-          onEdit: () => _showEditRecordSheet(context, record),
-          onDelete: () => _confirmDelete(context, record.id),
-          onEndMedication: () => _endMedication(context, record.id),
+        final agg = plans[index];
+        return MedicationPlanCard(
+          aggregate: agg,
+          onEdit: () => _showEditPlanSheet(context, agg),
+          onDelete: () => _confirmDeletePlan(context, agg.plan.id),
+          onEndPlan: () => _endPlan(context, agg.plan.id),
+          onOpenTodayCheckin: () => _showTodayCheckinSheet(
+            context,
+            filterPlanId: agg.plan.id,
+            filterPlanName: agg.plan.medicationName,
+          ),
         );
       },
     );
   }
 
-  Widget _buildHistoryMedications(List records) {
-    if (records.isEmpty) {
+  Widget _buildHistoryMedications(
+    BuildContext context,
+    List<MedicationPlanAggregate> plans,
+  ) {
+    if (plans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -210,20 +321,23 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: records.length,
+      itemCount: plans.length,
       itemBuilder: (context, index) {
-        final record = records[index];
-        return MedicationRecordCard(
-          record: record,
-          onEdit: () => _showEditRecordSheet(context, record),
-          onDelete: () => _confirmDelete(context, record.id),
+        final agg = plans[index];
+        return MedicationPlanCard(
+          aggregate: agg,
+          onEdit: () => _showEditPlanSheet(context, agg),
+          onDelete: () => _confirmDeletePlan(context, agg.plan.id),
         );
       },
     );
   }
 
-  Widget _buildComplianceStats(List activeRecords) {
-    if (activeRecords.isEmpty) {
+  Widget _buildPlanComplianceStats(
+    WidgetRef ref,
+    List<MedicationPlanAggregate> activePlans,
+  ) {
+    if (activePlans.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -252,24 +366,18 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       );
     }
 
-    // 计算总体依从性
-    return FutureBuilder<List<double>>(
-      future: _calculateOverallCompliance(activeRecords),
+    return FutureBuilder<double>(
+      future: _calculateOverallWeightedPlanCompliance(ref, activePlans),
       builder: (context, snapshot) {
-        final complianceRates = snapshot.data ?? [];
-        final overallRate = complianceRates.isEmpty
-            ? 0.0
-            : complianceRates.reduce((a, b) => a + b) / complianceRates.length;
+        final overallRate = snapshot.data ?? 0.0;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
           child: Column(
             children: [
-              // 总体依从性
               GlassCard(
                 child: Column(
                   children: [
-                    // 环形进度指示器
                     SizedBox(
                       width: 150,
                       height: 150,
@@ -315,7 +423,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      '基于当前所有用药记录分析',
+                      '基于当前用药计划（按时间点槽位；总览按应服次数加权）',
                       style: TextStyle(
                         fontSize: AppTheme.fontSizeCaption,
                         color: AppTheme.textTertiary,
@@ -328,71 +436,66 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
               ),
               const SizedBox(height: 16),
 
-              // 各药品依从性
-              ...activeRecords.map((record) {
-                return Consumer(
-                  builder: (context, ref, _) {
-                    final complianceAsync = ref.watch(
-                      medicationComplianceProvider(record.id),
-                    );
-                    return complianceAsync.when(
-                      data: (compliance) => GlassCard(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    record.name,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.textPrimary,
-                                      fontFamily: AppTheme.fontFamily,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '已记录 ${compliance.totalDays} 天',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                      fontFamily: AppTheme.fontFamily,
-                                    ),
-                                  ),
-                                ],
+              ...activePlans.map((agg) {
+                final complianceAsync = ref.watch(
+                  medicationPlanSlotComplianceProvider(agg.plan.id),
+                );
+                return complianceAsync.when(
+                  data: (compliance) => GlassCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                agg.plan.medicationName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textPrimary,
+                                  fontFamily: AppTheme.fontFamily,
+                                ),
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '应服 ${compliance.totalDays} 次（截至今日）',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                  fontFamily: AppTheme.fontFamily,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            _buildMiniStat(
+                              '已服',
+                              compliance.takenDays,
+                              AppTheme.success,
                             ),
-                            Row(
-                              children: [
-                                _buildMiniStat(
-                                  '已服',
-                                  compliance.takenDays,
-                                  AppTheme.success,
-                                ),
-                                const SizedBox(width: 8),
-                                _buildMiniStat(
-                                  '漏服',
-                                  compliance.missedDays,
-                                  AppTheme.error,
-                                ),
-                                const SizedBox(width: 8),
-                                _buildMiniStat(
-                                  '跳过',
-                                  compliance.skippedDays,
-                                  AppTheme.warning,
-                                ),
-                              ],
+                            const SizedBox(width: 8),
+                            _buildMiniStat(
+                              '漏服',
+                              compliance.missedDays,
+                              AppTheme.error,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildMiniStat(
+                              '跳过',
+                              compliance.skippedDays,
+                              AppTheme.warning,
                             ),
                           ],
                         ),
-                      ),
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
                 );
               }),
             ],
@@ -426,17 +529,22 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
   }
 
-  Future<List<double>> _calculateOverallCompliance(List records) async {
-    final rates = <double>[];
-    for (final record in records) {
+  /// 各 active 计划的槽位加权：总已服 / 总应服（与简单平均各计划率相比更公平）
+  Future<double> _calculateOverallWeightedPlanCompliance(
+    WidgetRef ref,
+    List<MedicationPlanAggregate> plans,
+  ) async {
+    var totalSlots = 0;
+    var takenSlots = 0;
+    for (final agg in plans) {
       final compliance = await ref.read(
-        medicationComplianceProvider(record.id).future,
+        medicationPlanSlotComplianceProvider(agg.plan.id).future,
       );
-      if (compliance.totalDays > 0) {
-        rates.add(compliance.complianceRate);
-      }
+      totalSlots += compliance.totalDays;
+      takenSlots += compliance.takenDays;
     }
-    return rates;
+    if (totalSlots <= 0) return 0.0;
+    return takenSlots / totalSlots;
   }
 
   void _showAddRecordSheet(BuildContext context) {
@@ -446,21 +554,21 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const MedicationRecordForm(),
+      builder: (context) => const MedicationPlanForm(),
     );
   }
 
-  void _showEditRecordSheet(BuildContext context, record) {
+  void _showEditPlanSheet(BuildContext context, MedicationPlanAggregate agg) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => MedicationRecordForm(existingRecord: record),
+      builder: (context) => MedicationPlanForm(existingAggregate: agg),
     );
   }
 
-  Future<void> _endMedication(BuildContext context, String id) async {
+  Future<void> _endPlan(BuildContext context, String planId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -480,23 +588,23 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     );
 
     if (confirmed == true && mounted) {
-      final result = await ref
-          .read(medicationRecordNotifierProvider.notifier)
-          .endMedication(id, DateTime.now());
+      final ok = await ref
+          .read(medicationPlanNotifierProvider.notifier)
+          .endPlan(planId, DateTime.now());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result != null ? '用药计划已结束' : '操作失败')),
+          SnackBar(content: Text(ok ? '用药计划已结束' : '操作失败')),
         );
       }
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, String id) async {
+  Future<void> _confirmDeletePlan(BuildContext context, String planId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('确认删除'),
-        content: const Text('确定要删除这条用药记录吗？此操作无法撤销。'),
+        content: const Text('确定要删除该用药计划吗？打卡记录将一并清除，且无法撤销。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -513,12 +621,12 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
 
     if (confirmed == true && mounted) {
       final success = await ref
-          .read(medicationRecordNotifierProvider.notifier)
-          .delete(id);
+          .read(medicationPlanNotifierProvider.notifier)
+          .deletePlan(planId);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(success ? '记录已删除' : '删除失败')));
+        ).showSnackBar(SnackBar(content: Text(success ? '计划已删除' : '删除失败')));
       }
     }
   }

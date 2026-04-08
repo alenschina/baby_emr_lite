@@ -5,16 +5,14 @@ import '../../data/repositories/baby_repository_impl.dart';
 import '../../data/repositories/medical_record_repository_impl.dart';
 import '../../data/repositories/vaccination_record_repository_impl.dart';
 import '../../data/repositories/growth_data_repository_impl.dart';
-import '../../data/repositories/medication_record_repository_impl.dart';
-import '../../data/repositories/medication_status_repository_impl.dart';
-import '../../data/repositories/medication_reminder_repository_impl.dart';
+import '../../data/repositories/medication_plan_repository_impl.dart';
+import '../../data/repositories/medication_intake_status_repository_impl.dart';
 import '../../domain/repositories/baby_repository.dart';
 import '../../domain/repositories/medical_record_repository.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../domain/repositories/growth_data_repository.dart';
-import '../../domain/repositories/medication_record_repository.dart';
-import '../../domain/repositories/medication_status_repository.dart';
-import '../../domain/repositories/medication_reminder_repository.dart';
+import '../../domain/repositories/medication_plan_repository.dart';
+import '../../domain/repositories/medication_intake_status_repository.dart';
 
 /// 加密服务 Provider
 final encryptionServiceProvider = Provider<EncryptionService>((ref) {
@@ -54,27 +52,19 @@ final growthDataRepositoryProvider = Provider<GrowthDataRepository>((ref) {
   return GrowthDataRepositoryImpl(storage);
 });
 
-/// 用药记录仓库 Provider
-final medicationRecordRepositoryProvider = Provider<MedicationRecordRepository>(
-  (ref) {
-    final storage = ref.watch(hiveStorageProvider);
-    return MedicationRecordRepositoryImpl(storage);
-  },
-);
+/// 用药计划仓库 Provider（方案 C）
+final medicationPlanRepositoryProvider = Provider<MedicationPlanRepository>((
+  ref,
+) {
+  final storage = ref.watch(hiveStorageProvider);
+  return MedicationPlanRepositoryImpl(storage);
+});
 
-/// 用药状态仓库 Provider
-final medicationStatusRepositoryProvider = Provider<MedicationStatusRepository>(
-  (ref) {
-    final storage = ref.watch(hiveStorageProvider);
-    return MedicationStatusRepositoryImpl(storage);
-  },
-);
-
-/// 用药提醒仓库 Provider
-final medicationReminderRepositoryProvider =
-    Provider<MedicationReminderRepository>((ref) {
+/// 用药打卡仓库 Provider（方案 C）
+final medicationIntakeStatusRepositoryProvider =
+    Provider<MedicationIntakeStatusRepository>((ref) {
       final storage = ref.watch(hiveStorageProvider);
-      return MedicationReminderRepositoryImpl(storage);
+      return MedicationIntakeStatusRepositoryImpl(storage);
     });
 
 /// 应用初始化 Provider
