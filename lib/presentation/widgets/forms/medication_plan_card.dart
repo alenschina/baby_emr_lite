@@ -6,6 +6,7 @@ import '../../../domain/entities/medication_frequency.dart';
 import '../../../domain/entities/medication_plan_aggregate.dart';
 import '../../../domain/enums/medication_frequency_type.dart';
 import '../../providers/medication_providers.dart';
+import '../card_outlined_action_button.dart';
 import '../glass_card.dart';
 
 String medicationFrequencyDisplay(MedicationFrequency f) {
@@ -218,7 +219,7 @@ class MedicationPlanCard extends ConsumerWidget {
                     mine.where((i) => i.status == null).length;
                 return SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: ElevatedButton.icon(
                     onPressed: onOpenTodayCheckin,
                     icon: const Icon(Icons.fact_check_outlined, size: 20),
                     label: Text(
@@ -230,17 +231,15 @@ class MedicationPlanCard extends ConsumerWidget {
                         fontFamily: AppTheme.fontFamily,
                       ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.brandPrimary,
-                      side: BorderSide(
-                        color: AppTheme.brandPrimary.withOpacity(0.45),
-                      ),
+                    style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 12,
+                        vertical: 14,
                         horizontal: 16,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusButton,
+                        ),
                       ),
                     ),
                   ),
@@ -251,37 +250,37 @@ class MedicationPlanCard extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (isActive && onEndPlan != null)
-                TextButton.icon(
-                  onPressed: onEndPlan,
-                  icon: const Icon(Icons.stop_circle_outlined, size: 18),
-                  label: const Text('结束用药'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.warning,
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (isActive && onEndPlan != null)
+                  CardOutlinedActionButton(
+                    icon: Icons.stop_circle_outlined,
+                    label: '结束用药',
+                    foreground: AppTheme.warning,
+                    onPressed: onEndPlan!,
                   ),
-                ),
-              if (onEdit != null)
-                IconButton(
-                  onPressed: onEdit,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 20,
-                    color: AppTheme.textTertiary,
+                if (onEdit != null)
+                  CardOutlinedActionButton(
+                    icon: Icons.edit_outlined,
+                    label: '编辑',
+                    foreground: AppTheme.textSecondary,
+                    onPressed: onEdit!,
                   ),
-                ),
-              if (onDelete != null)
-                IconButton(
-                  onPressed: onDelete,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: AppTheme.error,
+                if (onDelete != null)
+                  CardOutlinedActionButton(
+                    icon: Icons.delete_outline,
+                    label: '删除',
+                    foreground: AppTheme.error,
+                    onPressed: onDelete!,
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

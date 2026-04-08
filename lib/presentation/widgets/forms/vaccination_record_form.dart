@@ -5,6 +5,7 @@ import '../../../core/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/vaccination_record.dart';
 import '../../providers/vaccination_record_providers.dart';
 import '../../utils/baby_record_guard.dart';
+import '../card_outlined_action_button.dart';
 import '../glass_card.dart';
 
 /// 疫苗接种表单组件
@@ -538,39 +539,60 @@ class VaccinationRecordCard extends ConsumerWidget {
             ),
           ],
 
-          // 操作按钮
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (!isCompleted && onMarkCompleted != null)
-                TextButton.icon(
-                  onPressed: onMarkCompleted,
-                  icon: const Icon(Icons.check, size: 18),
-                  label: const Text('标记完成'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.success,
+          // 操作按钮（与用药计划卡片：主操作 Elevated + 次要 Outlined 一致）
+          const SizedBox(height: 12),
+          if (!isCompleted && onMarkCompleted != null) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onMarkCompleted!,
+                icon: const Icon(Icons.check_circle_outline, size: 20),
+                label: const Text(
+                  '标记完成',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: AppTheme.fontFamily,
                   ),
                 ),
-              if (onEdit != null)
-                IconButton(
-                  onPressed: onEdit,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 20,
-                    color: AppTheme.textTertiary,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.success,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                   ),
                 ),
-              if (onDelete != null)
-                IconButton(
-                  onPressed: onDelete,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: AppTheme.error,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (onEdit != null)
+                  CardOutlinedActionButton(
+                    icon: Icons.edit_outlined,
+                    label: '编辑',
+                    foreground: AppTheme.textSecondary,
+                    onPressed: onEdit!,
                   ),
-                ),
-            ],
+                if (onDelete != null)
+                  CardOutlinedActionButton(
+                    icon: Icons.delete_outline,
+                    label: '删除',
+                    foreground: AppTheme.error,
+                    onPressed: onDelete!,
+                  ),
+              ],
+            ),
           ),
         ],
       ),
