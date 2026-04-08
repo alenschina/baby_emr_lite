@@ -18,13 +18,15 @@ class BabyListItem extends StatelessWidget {
     required this.onDelete,
   });
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withAlpha(_alpha(0.7)),
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.cardShadow,
       ),
@@ -89,10 +91,10 @@ class BabyListItem extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.brandPrimary.withOpacity(0.1),
+                    color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppTheme.brandPrimary.withOpacity(0.3),
+                      color: AppTheme.brandPrimary.withAlpha(_alpha(0.3)),
                       width: 1,
                     ),
                   ),
@@ -131,7 +133,7 @@ class BabyListItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.brandPrimary.withOpacity(0.3),
+                          color: AppTheme.brandPrimary.withAlpha(_alpha(0.3)),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

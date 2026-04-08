@@ -17,6 +17,8 @@ class CardOutlinedActionButton extends StatelessWidget {
   final Color foreground;
   final VoidCallback onPressed;
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
@@ -32,7 +34,7 @@ class CardOutlinedActionButton extends StatelessWidget {
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: foreground,
-        side: BorderSide(color: foreground.withOpacity(0.38)),
+        side: BorderSide(color: foreground.withAlpha(_alpha(0.38))),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         minimumSize: const Size(0, 40),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -19,6 +19,8 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
   Gender _selectedGender = Gender.male;
   DateTime? _selectedBirthDate;
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -32,7 +34,7 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
         maxHeight: MediaQuery.of(context).size.height * 0.5, // 最大高度为屏幕高度的50%
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withAlpha(_alpha(0.7)),
         borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.cardShadow,
       ),
@@ -91,7 +93,7 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withAlpha(_alpha(0.6)),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: DropdownButtonHideUnderline(
@@ -141,7 +143,7 @@ class _AddBabyFormState extends ConsumerState<AddBabyForm> {
                               vertical: 16,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withAlpha(_alpha(0.6)),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(

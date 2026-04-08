@@ -11,6 +11,8 @@ class BabyWelcomeCard extends StatelessWidget {
 
   const BabyWelcomeCard({super.key, required this.baby});
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context) {
     final isMale = baby.gender == Gender.male;
@@ -40,12 +42,12 @@ class BabyWelcomeCard extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: isMale
                           ? [
-                              const Color(0xFF3B82F6).withOpacity(0.15),
-                              const Color(0xFF6366F1).withOpacity(0.1),
+                              const Color(0xFF3B82F6).withAlpha(_alpha(0.15)),
+                              const Color(0xFF6366F1).withAlpha(_alpha(0.1)),
                             ]
                           : [
-                              const Color(0xFFEC4899).withOpacity(0.15),
-                              const Color(0xFFF43F5E).withOpacity(0.1),
+                              const Color(0xFFEC4899).withAlpha(_alpha(0.15)),
+                              const Color(0xFFF43F5E).withAlpha(_alpha(0.1)),
                             ],
                     ),
                     borderRadius: BorderRadius.circular(
@@ -94,13 +96,13 @@ class BabyWelcomeCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: isMale
-                  ? const Color(0xFF3B82F6).withOpacity(0.1)
-                  : const Color(0xFFEC4899).withOpacity(0.1),
+                  ? const Color(0xFF3B82F6).withAlpha(_alpha(0.1))
+                  : const Color(0xFFEC4899).withAlpha(_alpha(0.1)),
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               border: Border.all(
                 color: isMale
-                    ? const Color(0xFF3B82F6).withOpacity(0.15)
-                    : const Color(0xFFEC4899).withOpacity(0.15),
+                    ? const Color(0xFF3B82F6).withAlpha(_alpha(0.15))
+                    : const Color(0xFFEC4899).withAlpha(_alpha(0.15)),
                 width: 1,
               ),
             ),
