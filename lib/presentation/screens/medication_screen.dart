@@ -123,7 +123,8 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                           final end = a.plan.endDate;
                           if (end == null) return true;
                           final endD = DateTime(end.year, end.month, end.day);
-                          return !endD.isBefore(todayDate);
+                          // 与「结束用药」一致：end 落在当天即视为已结束，进入历史
+                          return endD.isAfter(todayDate);
                         }
 
                         final activePlans =

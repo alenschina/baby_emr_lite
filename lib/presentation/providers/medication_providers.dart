@@ -37,7 +37,7 @@ final medicationPlanAggregatesProvider =
       return repository.listAggregatesByBabyId(babyId);
     });
 
-/// 进行中的用药计划聚合（endDate 为空或 >= 今日）
+/// 进行中的用药计划聚合（endDate 为空或严格晚于今日；当日结束即不再算进行中）
 final activeMedicationPlanAggregatesProvider =
     FutureProvider<List<MedicationPlanAggregate>>((ref) async {
       final all = await ref.watch(medicationPlanAggregatesProvider.future);
@@ -46,7 +46,7 @@ final activeMedicationPlanAggregatesProvider =
       return all.where((agg) {
         final end = agg.plan.endDate;
         return end == null ||
-            !DateTime(end.year, end.month, end.day).isBefore(todayDate);
+            DateTime(end.year, end.month, end.day).isAfter(todayDate);
       }).toList();
     });
 

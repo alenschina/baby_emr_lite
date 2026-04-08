@@ -41,7 +41,7 @@ class MedicationPlanCard extends ConsumerWidget {
     final end = aggregate.plan.endDate;
     if (end == null) return true;
     final endD = DateTime(end.year, end.month, end.day);
-    return !endD.isBefore(todayDate);
+    return endD.isAfter(todayDate);
   }
 
   @override
