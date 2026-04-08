@@ -5,6 +5,7 @@ import '../../domain/entities/medication_plan_aggregate.dart';
 import '../providers/medication_providers.dart';
 import '../providers/baby_providers.dart';
 import '../utils/baby_record_guard.dart';
+import '../widgets/medication_compliance_overview_card.dart';
 import '../widgets/medication_tab_bar.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/forms/medication_plan_card.dart';
@@ -367,75 +368,40 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       );
     }
 
-    return FutureBuilder<double>(
-      future: _calculateOverallWeightedPlanCompliance(ref, activePlans),
+    return FutureBuilder<MedicationCompliance>(
+      future: _aggregateActivePlansCompliance(ref, activePlans),
       builder: (context, snapshot) {
-        final overallRate = snapshot.data ?? 0.0;
-
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
           child: Column(
             children: [
               GlassCard(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      height: 150,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            value: overallRate,
-                            strokeWidth: 12,
-                            backgroundColor: AppTheme.slate200,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              overallRate >= 0.8
-                                  ? AppTheme.success
-                                  : overallRate >= 0.5
-                                  ? AppTheme.warning
-                                  : AppTheme.error,
-                            ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: snapshot.hasError
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 8,
+                        ),
+                        child: Text(
+                          '加载依从性数据失败',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: AppTheme.fontSizeBody,
+                            color: AppTheme.error,
+                            fontFamily: AppTheme.fontFamily,
                           ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${(overallRate * 100).toStringAsFixed(0)}%',
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textPrimary,
-                                  fontFamily: AppTheme.fontFamily,
-                                ),
-                              ),
-                              Text(
-                                '总用药依从性',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                  fontFamily: AppTheme.fontFamily,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
+                      )
+                    : MedicationComplianceOverviewCard(
+                        isLoading:
+                            snapshot.connectionState == ConnectionState.waiting,
+                        aggregate: snapshot.data,
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      '基于当前用药计划（按时间点槽位；总览按应服次数加权）',
-                      style: TextStyle(
-                        fontSize: AppTheme.fontSizeCaption,
-                        color: AppTheme.textTertiary,
-                        fontFamily: AppTheme.fontFamily,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               ...activePlans.map((agg) {
                 final complianceAsync = ref.watch(
@@ -444,6 +410,10 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                 return complianceAsync.when(
                   data: (compliance) => GlassCard(
                     margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -452,6 +422,8 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                             children: [
                               Text(
                                 agg.plan.medicationName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -459,9 +431,11 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                                   fontFamily: AppTheme.fontFamily,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
                               Text(
-                                '应服 ${compliance.totalDays} 次（截至今日）',
+                                '应服 ${compliance.totalDays} 次 · 截至今日',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.textSecondary,
@@ -472,19 +446,20 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                           ),
                         ),
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildMiniStat(
                               '已服',
                               compliance.takenDays,
                               AppTheme.success,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 6),
                             _buildMiniStat(
                               '漏服',
                               compliance.missedDays,
                               AppTheme.error,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 6),
                             _buildMiniStat(
                               '跳过',
                               compliance.skippedDays,
@@ -507,45 +482,70 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
   }
 
   Widget _buildMiniStat(String label, int count, Color color) {
-    return Column(
-      children: [
-        Text(
-          count.toString(),
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: color,
-            fontFamily: AppTheme.fontFamily,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.11),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.22)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            count.toString(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: color,
+              fontFamily: AppTheme.fontFamily,
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: AppTheme.textTertiary,
-            fontFamily: AppTheme.fontFamily,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary,
+              fontFamily: AppTheme.fontFamily,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  /// 各 active 计划的槽位加权：总已服 / 总应服（与简单平均各计划率相比更公平）
-  Future<double> _calculateOverallWeightedPlanCompliance(
+  /// 汇总各进行中计划的槽位统计（加权与环形图分段一致）
+  Future<MedicationCompliance> _aggregateActivePlansCompliance(
     WidgetRef ref,
     List<MedicationPlanAggregate> plans,
   ) async {
-    var totalSlots = 0;
-    var takenSlots = 0;
+    var total = 0;
+    var taken = 0;
+    var missed = 0;
+    var skipped = 0;
     for (final agg in plans) {
-      final compliance = await ref.read(
+      final c = await ref.read(
         medicationPlanSlotComplianceProvider(agg.plan.id).future,
       );
-      totalSlots += compliance.totalDays;
-      takenSlots += compliance.takenDays;
+      total += c.totalDays;
+      taken += c.takenDays;
+      missed += c.missedDays;
+      skipped += c.skippedDays;
     }
-    if (totalSlots <= 0) return 0.0;
-    return takenSlots / totalSlots;
+    final rate = total <= 0 ? 0.0 : taken / total;
+    return MedicationCompliance(
+      totalDays: total,
+      takenDays: taken,
+      missedDays: missed,
+      skippedDays: skipped,
+      complianceRate: rate,
+    );
   }
 
   void _showAddRecordSheet(BuildContext context) {
