@@ -33,6 +33,8 @@ class MedicationScreen extends ConsumerStatefulWidget {
 
 class _MedicationScreenState extends ConsumerState<MedicationScreen>
     with SingleTickerProviderStateMixin {
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   late TabController _tabController;
 
   String? _pendingCheckInPlanId;
@@ -485,9 +487,9 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.11),
+        color: color.withAlpha(_alpha(0.11)),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.22)),
+        border: Border.all(color: color.withAlpha(_alpha(0.22))),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -10,6 +10,8 @@ import '../widgets/glass_card.dart';
 import '../widgets/forms/growth_data_form.dart';
 import '../widgets/adaptive_fab.dart';
 
+int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 生长发育屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
 class GrowthScreen extends ConsumerStatefulWidget {
@@ -187,7 +189,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
     );
   }
 
-  Widget _buildHealthCard(latest) {
+  Widget _buildHealthCard(GrowthData latest) {
     return GlassCard(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -203,7 +205,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: AppTheme.brandPrimary.withOpacity(0.1),
+                      color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -411,7 +413,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                 decoration: BoxDecoration(
                   color: isFirst
                       ? AppTheme.brandPrimary
-                      : AppTheme.brandPrimary.withOpacity(0.5),
+                      : AppTheme.brandPrimary.withAlpha(_alpha(0.5)),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
@@ -426,8 +428,8 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppTheme.brandPrimary.withOpacity(0.3),
-                        AppTheme.brandPrimary.withOpacity(0.08),
+                        AppTheme.brandPrimary.withAlpha(_alpha(0.3)),
+                        AppTheme.brandPrimary.withAlpha(_alpha(0.08)),
                       ],
                     ),
                   ),
@@ -538,14 +540,14 @@ class _TimelineGrowthBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isFirst
-              ? AppTheme.brandPrimary.withOpacity(0.25)
+              ? AppTheme.brandPrimary.withAlpha(_alpha(0.25))
               : AppTheme.glassBorder,
           width: 1,
         ),
         boxShadow: isFirst
             ? [
                 BoxShadow(
-                  color: AppTheme.brandPrimary.withOpacity(0.08),
+                  color: AppTheme.brandPrimary.withAlpha(_alpha(0.08)),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -599,7 +601,7 @@ class _TimelineGrowthBar extends StatelessWidget {
                     child: Icon(
                       Icons.delete_outline,
                       size: 14,
-                      color: AppTheme.error.withOpacity(0.7),
+                      color: AppTheme.error.withAlpha(_alpha(0.7)),
                     ),
                   ),
               ],
@@ -616,7 +618,7 @@ class _TimelineGrowthBar extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.brandPrimary.withOpacity(0.08),
+                      color: AppTheme.brandPrimary.withAlpha(_alpha(0.08)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -667,7 +669,7 @@ class _TimelineGrowthBar extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.success.withOpacity(0.08),
+                      color: AppTheme.success.withAlpha(_alpha(0.08)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -723,7 +725,7 @@ class _TimelineGrowthBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withAlpha(_alpha(0.15)),
         borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
@@ -839,7 +841,7 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: AppTheme.brandPrimary.withOpacity(0.1),
+                        color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(
@@ -948,7 +950,7 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
       lineTouchData: LineTouchData(
         enabled: true,
         touchTooltipData: LineTouchTooltipData(
-          tooltipBgColor: Colors.white.withOpacity(0.95),
+          tooltipBgColor: Colors.white.withAlpha(_alpha(0.95)),
           tooltipRoundedRadius: 8,
           tooltipPadding: const EdgeInsets.symmetric(
             horizontal: 12,
@@ -984,7 +986,7 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
         horizontalInterval: 5, // 与Y轴刻度间隔保持一致
         getDrawingHorizontalLine: (value) {
           return FlLine(
-            color: AppTheme.slate200.withOpacity(0.5),
+            color: AppTheme.slate200.withAlpha(_alpha(0.5)),
             strokeWidth: 1,
           );
         },
@@ -1072,8 +1074,8 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.brandPrimary.withOpacity(0.15),
-                AppTheme.brandPrimary.withOpacity(0.02),
+                AppTheme.brandPrimary.withAlpha(_alpha(0.15)),
+                AppTheme.brandPrimary.withAlpha(_alpha(0.02)),
               ],
             ),
           ),
@@ -1110,8 +1112,8 @@ class _GrowthTrendChartState extends State<_GrowthTrendChart>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppTheme.success.withOpacity(0.15),
-                AppTheme.success.withOpacity(0.02),
+                AppTheme.success.withAlpha(_alpha(0.15)),
+                AppTheme.success.withAlpha(_alpha(0.02)),
               ],
             ),
           ),

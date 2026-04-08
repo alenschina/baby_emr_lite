@@ -115,7 +115,7 @@ class LayoutUtils {
         vertical: 1.5,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withAlpha((0.15 * 255).round().clamp(0, 255)),
         borderRadius: BorderRadius.circular(3),
       ),
       child: Row(
@@ -239,31 +239,8 @@ class LayoutConstraintWrapper extends StatelessWidget {
   }
 
   Widget _buildOverflowIndicator(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 检测是否溢出
-        final isOverflow = false; // 实际检测需要更复杂的逻辑
-        return isOverflow
-            ? Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.transparent,
-                        Colors.red.withOpacity(0.3),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            : const SizedBox.shrink();
-      },
-    );
+    // 该指示器需要真实的溢出检测逻辑才能正确显示。
+    // 当前没有可靠的检测实现，避免保留“永远为 false”的死代码。
+    return const SizedBox.shrink();
   }
 }

@@ -21,6 +21,8 @@ class MedicalRecordsScreen extends ConsumerStatefulWidget {
 }
 
 class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   bool _showFilter = false;
   MedicalRecordFilter _currentFilter = const MedicalRecordFilter();
 
@@ -240,7 +242,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppTheme.brandPrimary.withOpacity(0.8),
+                    color: AppTheme.brandPrimary.withAlpha(_alpha(0.8)),
                     width: 1.5,
                   ),
                 ),
@@ -366,12 +368,12 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                 decoration: BoxDecoration(
                   color: isFirst
                       ? AppTheme.brandPrimary
-                      : AppTheme.brandPrimary.withOpacity(0.6),
+                      : AppTheme.brandPrimary.withAlpha(_alpha(0.6)),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.brandPrimary.withOpacity(0.3),
+                      color: AppTheme.brandPrimary.withAlpha(_alpha(0.3)),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -388,8 +390,8 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppTheme.brandPrimary.withOpacity(0.4),
-                        AppTheme.brandPrimary.withOpacity(0.1),
+                        AppTheme.brandPrimary.withAlpha(_alpha(0.4)),
+                        AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                       ],
                     ),
                   ),
@@ -500,6 +502,8 @@ class _TimelineRecordCard extends StatefulWidget {
 }
 
 class _TimelineRecordCardState extends State<_TimelineRecordCard> {
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   late bool _isExpanded;
 
   @override
@@ -528,14 +532,14 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: widget.isFirst
-                ? AppTheme.brandPrimary.withOpacity(0.3)
+                ? AppTheme.brandPrimary.withAlpha(_alpha(0.3))
                 : AppTheme.glassBorder,
             width: 1,
           ),
           boxShadow: widget.isFirst
               ? [
                   BoxShadow(
-                    color: AppTheme.brandPrimary.withOpacity(0.1),
+                    color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -549,7 +553,7 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppTheme.brandPrimary.withOpacity(0.1),
+                color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
@@ -633,7 +637,7 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.success.withOpacity(0.1),
+                      color: AppTheme.success.withAlpha(_alpha(0.1)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -723,7 +727,7 @@ class _TimelineRecordCardState extends State<_TimelineRecordCard> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.brandPrimary.withOpacity(0.05),
+                      color: AppTheme.brandPrimary.withAlpha(_alpha(0.05)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

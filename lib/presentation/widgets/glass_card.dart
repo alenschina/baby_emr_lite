@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
+int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
 /// Liquid 风格卡片组件
 /// 现代流体设计语言：柔和有机形状、流体渐变、光泽感
 /// 特点：
@@ -118,7 +120,10 @@ class GlassCard extends StatelessWidget {
             ),
             border:
                 border ??
-                Border.all(color: Colors.white.withOpacity(0.8), width: 1.5),
+                Border.all(
+                  color: Colors.white.withAlpha(_alpha(0.8)),
+                  width: 1.5,
+                ),
             boxShadow: showShadow
                 ? (boxShadow ?? AppTheme.glassCardShadow)
                 : null,
@@ -179,18 +184,21 @@ class GlassIconContainer extends StatelessWidget {
           center: Alignment.topLeft,
           radius: 1.2,
           colors: [
-            Colors.white.withOpacity(0.95),
-            backgroundColor ?? Colors.white.withOpacity(0.75),
-            (gradientColor ?? AppTheme.brandPrimary).withOpacity(0.08),
+            Colors.white.withAlpha(_alpha(0.95)),
+            backgroundColor ?? Colors.white.withAlpha(_alpha(0.75)),
+            (gradientColor ?? AppTheme.brandPrimary).withAlpha(_alpha(0.08)),
           ],
           stops: const [0.0, 0.7, 1.0],
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
-        border: Border.all(color: Colors.white.withOpacity(0.8), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withAlpha(_alpha(0.8)),
+          width: 1.5,
+        ),
         // 柔和阴影
         boxShadow: [
           BoxShadow(
-            color: (gradientColor ?? AppTheme.brandPrimary).withOpacity(0.1),
+            color: (gradientColor ?? AppTheme.brandPrimary).withAlpha(_alpha(0.1)),
             blurRadius: 15,
             spreadRadius: -3,
             offset: const Offset(0, 5),
@@ -263,13 +271,13 @@ class GradientButton extends StatelessWidget {
           // Liquid 风格柔和阴影
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6B5CE7).withOpacity(0.35),
+              color: const Color(0xFF6B5CE7).withAlpha(_alpha(0.35)),
               blurRadius: 25,
               spreadRadius: -5,
               offset: const Offset(0, 10),
             ),
             BoxShadow(
-              color: const Color(0xFFFF6BBD).withOpacity(0.15),
+              color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.15)),
               blurRadius: 15,
               offset: const Offset(5, 5),
             ),

@@ -50,7 +50,7 @@ final hasBabiesProvider = Provider<bool>((ref) {
   return babiesAsync.when(
     data: (babies) => babies.isNotEmpty,
     loading: () => false,
-    error: (_, __) => false,
+    error: (err, stack) => false,
   );
 });
 

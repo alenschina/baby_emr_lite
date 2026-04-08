@@ -32,6 +32,9 @@ ehthumbs.db
 # VS Code
 .vscode/
 
+# Cursor
+.cursor/
+
 # Git worktrees (local)
 .worktrees/
 

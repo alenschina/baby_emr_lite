@@ -15,10 +15,12 @@ class DataManagementScreen extends ConsumerStatefulWidget {
   const DataManagementScreen({super.key});
 
   @override
-  ConsumerState<DataManagementScreen> createState() => _DataManagementScreenState();
+  ConsumerState<DataManagementScreen> createState() =>
+      _DataManagementScreenState();
 }
 
 class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
 
   bool _isFormExpanded = false;
 
@@ -46,10 +48,10 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withAlpha((0.6 * 255).round()),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withAlpha((0.5 * 255).round()),
                               width: 1,
                             ),
                           ),
@@ -292,7 +294,7 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withAlpha(_alpha(0.1)),
                 borderRadius: BorderRadius.circular(
                   AppTheme.radiusIconContainer,
                 ),
@@ -333,7 +335,6 @@ class _DataManagementScreenState extends ConsumerState<DataManagementScreen> {
           TextButton(
             onPressed: () {
               ref.read(babyNotifierProvider.notifier).setCurrentBaby(babyId);
-              ref.read(currentBabyIdProvider.notifier).state = babyId;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

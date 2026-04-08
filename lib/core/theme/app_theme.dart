@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 /// 风格：轻盈、柔和、医疗可信、玻璃拟态（Glassmorphism）、大圆角、低对比阴影
 /// 主色调：紫蓝色系 (#6B5CE7)
 class AppTheme {
+  static int _alpha(double opacity) =>
+      (opacity * 255).round().clamp(0, 255).toInt();
+
   // ==================== 核心品牌色 ====================
   /// Primary - 主按钮、强调色、关键数据（紫蓝色）
   static const Color brandPrimary = Color(0xFF6B5CE7);
@@ -56,10 +59,10 @@ class AppTheme {
   static const Color slate900 = Color(0xFF0F172A);
 
   /// 玻璃拟态卡片背景
-  static Color get glassBackground => Colors.white.withOpacity(0.7);
-  static Color get glassBackgroundHigh => Colors.white.withOpacity(0.8);
-  static Color get glassBorder => Colors.white.withOpacity(0.6);
-  static Color get glassInputBackground => Colors.white.withOpacity(0.6);
+  static Color get glassBackground => Colors.white.withAlpha(_alpha(0.7));
+  static Color get glassBackgroundHigh => Colors.white.withAlpha(_alpha(0.8));
+  static Color get glassBorder => Colors.white.withAlpha(_alpha(0.6));
+  static Color get glassInputBackground => Colors.white.withAlpha(_alpha(0.6));
 
   // ==================== 字体配置 ====================
   /// 抖音美好体
@@ -123,7 +126,7 @@ class AppTheme {
   /// 卡片阴影：shadow-[0_18px_45px_rgba(17,24,39,0.08)]
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: const Color(0xFF111827).withOpacity(0.08),
+      color: const Color(0xFF111827).withAlpha(_alpha(0.08)),
       blurRadius: 45,
       offset: const Offset(0, 18),
     ),
@@ -132,7 +135,7 @@ class AppTheme {
   /// 顶栏/导航阴影：shadow-[0_12px_30px_rgba(17,24,39,0.12)]
   static List<BoxShadow> get navShadow => [
     BoxShadow(
-      color: const Color(0xFF111827).withOpacity(0.12),
+      color: const Color(0xFF111827).withAlpha(_alpha(0.12)),
       blurRadius: 30,
       offset: const Offset(0, 12),
     ),
@@ -141,7 +144,7 @@ class AppTheme {
   /// 浮动按钮阴影：shadow-[0_20px_50px_rgba(91,90,246,0.45)]
   static List<BoxShadow> get fabShadow => [
     BoxShadow(
-      color: brandPrimary.withOpacity(0.45),
+      color: brandPrimary.withAlpha(_alpha(0.45)),
       blurRadius: 50,
       offset: const Offset(0, 20),
     ),
@@ -151,21 +154,21 @@ class AppTheme {
   static List<BoxShadow> get liquidFabShadow => [
     // 主阴影 - 柔和扩散的紫蓝色
     BoxShadow(
-      color: brandPrimary.withOpacity(0.35),
+      color: brandPrimary.withAlpha(_alpha(0.35)),
       blurRadius: 35,
       spreadRadius: -5,
       offset: const Offset(0, 15),
     ),
     // 次级阴影 - 粉色光晕
     BoxShadow(
-      color: const Color(0xFFFF6BBD).withOpacity(0.2),
+      color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.2)),
       blurRadius: 25,
       spreadRadius: -3,
       offset: const Offset(5, 10),
     ),
     // 环境光 - 淡蓝色
     BoxShadow(
-      color: const Color(0xFF6366F1).withOpacity(0.15),
+      color: const Color(0xFF6366F1).withAlpha(_alpha(0.15)),
       blurRadius: 40,
       spreadRadius: -8,
       offset: const Offset(-3, 8),
@@ -193,34 +196,37 @@ class AppTheme {
           center: Alignment.topLeft,
           radius: 1.3,
           colors: [
-            const Color(0xFF8B7BFF).withOpacity(0.98), // 亮紫蓝高光
-            (gradientColor ?? brandPrimary).withOpacity(0.95), // 主色
-            const Color(0xFF5B4CD7).withOpacity(0.9), // 深紫蓝
+            const Color(0xFF8B7BFF).withAlpha(_alpha(0.98)), // 亮紫蓝高光
+            (gradientColor ?? brandPrimary).withAlpha(_alpha(0.95)), // 主色
+            const Color(0xFF5B4CD7).withAlpha(_alpha(0.9)), // 深紫蓝
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
         borderRadius: BorderRadius.circular(14),
         // 细腻的内发光边框
-        border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withAlpha(_alpha(0.4)),
+          width: 1.5,
+        ),
         // Liquid 风格多层柔和阴影
         boxShadow: [
           // 主阴影 - 柔和扩散的紫蓝色
           BoxShadow(
-            color: (gradientColor ?? brandPrimary).withOpacity(0.35),
+            color: (gradientColor ?? brandPrimary).withAlpha(_alpha(0.35)),
             blurRadius: 30,
             spreadRadius: -5,
             offset: const Offset(0, 12),
           ),
           // 次级阴影 - 粉色光晕
           BoxShadow(
-            color: const Color(0xFFFF6BBD).withOpacity(0.18),
+            color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.18)),
             blurRadius: 20,
             spreadRadius: -3,
             offset: const Offset(4, 8),
           ),
           // 顶部高光效果
           BoxShadow(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withAlpha(_alpha(0.5)),
             blurRadius: 0,
             spreadRadius: 1,
             offset: const Offset(0, -1),
@@ -231,7 +237,7 @@ class AppTheme {
   /// 按钮阴影：shadow-[0_18px_45px_rgba(91,90,246,0.35)]
   static List<BoxShadow> get buttonShadow => [
     BoxShadow(
-      color: brandPrimary.withOpacity(0.35),
+      color: brandPrimary.withAlpha(_alpha(0.35)),
       blurRadius: 45,
       offset: const Offset(0, 18),
     ),
@@ -240,7 +246,7 @@ class AppTheme {
   /// 弱阴影
   static List<BoxShadow> get subtleShadow => [
     BoxShadow(
-      color: const Color(0xFF111827).withOpacity(0.06),
+      color: const Color(0xFF111827).withAlpha(_alpha(0.06)),
       blurRadius: 30,
       offset: const Offset(0, 12),
     ),
@@ -276,22 +282,25 @@ class AppTheme {
     double borderRadius = 24,
   }) => BoxDecoration(
     // 柔和的白色基底
-    color: baseColor ?? Colors.white.withOpacity(0.75),
+    color: baseColor ?? Colors.white.withAlpha(_alpha(0.75)),
     borderRadius: BorderRadius.circular(borderRadius),
     // 细腻的内发光边框
-    border: Border.all(color: Colors.white.withOpacity(0.8), width: 1.5),
+    border: Border.all(
+      color: Colors.white.withAlpha(_alpha(0.8)),
+      width: 1.5,
+    ),
     // 多层柔和阴影
     boxShadow: [
       // 主阴影 - 柔和扩散
       BoxShadow(
-        color: const Color(0xFF6B5CE7).withOpacity(0.08),
+        color: const Color(0xFF6B5CE7).withAlpha(_alpha(0.08)),
         blurRadius: 40,
         spreadRadius: -5,
         offset: const Offset(0, 20),
       ),
       // 顶部高光效果
       BoxShadow(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withAlpha(_alpha(0.9)),
         blurRadius: 0,
         spreadRadius: 1,
         offset: const Offset(0, -1),
@@ -306,23 +315,26 @@ class AppTheme {
       center: Alignment.topLeft,
       radius: 1.5,
       colors: [
-        Colors.white.withOpacity(0.95),
-        Colors.white.withOpacity(0.8),
-        const Color(0xFFF8F5FF).withOpacity(0.7),
+        Colors.white.withAlpha(_alpha(0.95)),
+        Colors.white.withAlpha(_alpha(0.8)),
+        const Color(0xFFF8F5FF).withAlpha(_alpha(0.7)),
       ],
       stops: const [0.0, 0.5, 1.0],
     ),
     borderRadius: BorderRadius.circular(24),
-    border: Border.all(color: Colors.white.withOpacity(0.9), width: 1.5),
+    border: Border.all(
+      color: Colors.white.withAlpha(_alpha(0.9)),
+      width: 1.5,
+    ),
     boxShadow: [
       BoxShadow(
-        color: const Color(0xFF6B5CE7).withOpacity(0.06),
+        color: const Color(0xFF6B5CE7).withAlpha(_alpha(0.06)),
         blurRadius: 50,
         spreadRadius: -10,
         offset: const Offset(0, 25),
       ),
       BoxShadow(
-        color: const Color(0xFFFF6BBD).withOpacity(0.04),
+        color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.04)),
         blurRadius: 30,
         spreadRadius: -5,
         offset: const Offset(10, 10),
@@ -334,28 +346,28 @@ class AppTheme {
   static LinearGradient get glassCardGradient => LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Colors.white.withOpacity(0.92), Colors.white.withOpacity(0.78)],
+    colors: [Colors.white.withAlpha(_alpha(0.92)), Colors.white.withAlpha(_alpha(0.78))],
   );
 
   /// 玻璃拟态高亮卡片渐变
   static LinearGradient get glassCardGradientHigh => LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Colors.white.withOpacity(0.98), Colors.white.withOpacity(0.88)],
+    colors: [Colors.white.withAlpha(_alpha(0.98)), Colors.white.withAlpha(_alpha(0.88))],
   );
 
   /// 玻璃卡片阴影（Liquid 风格 - 柔和多层）
   static List<BoxShadow> get glassCardShadow => [
     // 主阴影
     BoxShadow(
-      color: brandPrimary.withOpacity(0.06),
+      color: brandPrimary.withAlpha(_alpha(0.06)),
       blurRadius: 50,
       spreadRadius: -10,
       offset: const Offset(0, 25),
     ),
     // 环境光
     BoxShadow(
-      color: const Color(0xFFFF6BBD).withOpacity(0.03),
+      color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.03)),
       blurRadius: 30,
       offset: const Offset(10, 10),
     ),
@@ -367,33 +379,36 @@ class AppTheme {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        Colors.white.withOpacity(0.85),
-        Colors.white.withOpacity(0.75),
-        const Color(0xFFF8F5FF).withOpacity(0.7),
-        const Color(0xFFFFF5FC).withOpacity(0.65),
+        Colors.white.withAlpha(_alpha(0.85)),
+        Colors.white.withAlpha(_alpha(0.75)),
+        const Color(0xFFF8F5FF).withAlpha(_alpha(0.7)),
+        const Color(0xFFFFF5FC).withAlpha(_alpha(0.65)),
       ],
       stops: const [0.0, 0.4, 0.7, 1.0],
     ),
     borderRadius: BorderRadius.circular(radiusNav),
-    border: Border.all(color: Colors.white.withOpacity(0.85), width: 1.5),
+    border: Border.all(
+      color: Colors.white.withAlpha(_alpha(0.85)),
+      width: 1.5,
+    ),
     boxShadow: [
       // 主阴影
       BoxShadow(
-        color: brandPrimary.withOpacity(0.08),
+        color: brandPrimary.withAlpha(_alpha(0.08)),
         blurRadius: 35,
         spreadRadius: -5,
         offset: const Offset(0, 12),
       ),
       // 顶部高光
       BoxShadow(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withAlpha(_alpha(0.9)),
         blurRadius: 0,
         spreadRadius: 1,
         offset: const Offset(0, -1),
       ),
       // 粉色环境光
       BoxShadow(
-        color: const Color(0xFFFF6BBD).withOpacity(0.05),
+        color: const Color(0xFFFF6BBD).withAlpha(_alpha(0.05)),
         blurRadius: 20,
         spreadRadius: -3,
         offset: const Offset(8, 8),
@@ -407,14 +422,17 @@ class AppTheme {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        brandPrimary.withOpacity(0.15),
-        brandPrimary.withOpacity(0.1),
-        const Color(0xFF6366F1).withOpacity(0.08),
+        brandPrimary.withAlpha(_alpha(0.15)),
+        brandPrimary.withAlpha(_alpha(0.1)),
+        const Color(0xFF6366F1).withAlpha(_alpha(0.08)),
       ],
       stops: const [0.0, 0.5, 1.0],
     ),
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: brandPrimary.withOpacity(0.1), width: 1),
+    border: Border.all(
+      color: brandPrimary.withAlpha(_alpha(0.1)),
+      width: 1,
+    ),
   );
 
   // ==================== 主题数据 ====================
@@ -554,7 +572,7 @@ class AppTheme {
 
     // 分割线主题
     dividerTheme: DividerThemeData(
-      color: slate200.withOpacity(0.5),
+      color: slate200.withAlpha(_alpha(0.5)),
       thickness: 1,
     ),
 
