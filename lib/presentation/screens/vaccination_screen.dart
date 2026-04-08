@@ -6,6 +6,7 @@ import '../providers/baby_providers.dart';
 import '../utils/baby_record_guard.dart';
 import '../widgets/forms/vaccination_record_form.dart';
 import '../widgets/adaptive_fab.dart';
+import '../widgets/segment_tab_bar.dart';
 
 /// 疫苗接种屏幕
 /// 对齐 Design Spec：全局背景 + 玻璃拟态组件
@@ -47,37 +48,24 @@ class _VaccinationScreenState extends ConsumerState<VaccinationScreen>
             // 主要内容
             SafeArea(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 顶部标题栏
                   _buildHeader(currentBabyAsync),
 
-                  // Tab 栏
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicator: BoxDecoration(
-                        gradient: AppTheme.primaryButtonGradient,
-                        borderRadius: BorderRadius.circular(12),
+                  // Tab 栏（与用药管理 SegmentTabBar 视觉一致）
+                  SegmentTabBar(
+                    controller: _tabController,
+                    items: const [
+                      SegmentTabItem(
+                        icon: Icons.event_available_outlined,
+                        title: '待接种',
                       ),
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      dividerColor: Colors.transparent,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: AppTheme.textSecondary,
-                      labelStyle: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: AppTheme.fontFamily,
+                      SegmentTabItem(
+                        icon: Icons.check_circle_outline,
+                        title: '已完成',
                       ),
-                      tabs: const [
-                        Tab(text: '待接种'),
-                        Tab(text: '已完成'),
-                      ],
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
