@@ -16,7 +16,10 @@ class BabyWelcomeCard extends StatelessWidget {
     final isMale = baby.gender == Gender.male;
 
     return GlassCard(
-      padding: const EdgeInsets.all(AppTheme.cardPaddingLarge),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.cardPadding,
+        vertical: AppTheme.spacing3,
+      ),
       child: Row(
         children: [
           // 头像 - 圆角图片

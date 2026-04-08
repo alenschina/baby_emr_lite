@@ -79,12 +79,12 @@ class HomeScreen extends ConsumerWidget {
                             error: (_, __) => const SizedBox.shrink(),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
 
                           // 生长数据摘要
                           const GrowthSummaryCard(),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
                           // 今日提醒
                           const TodayRemindersSection(),

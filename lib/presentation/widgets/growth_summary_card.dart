@@ -48,7 +48,10 @@ class GrowthSummaryCard extends ConsumerWidget {
         children: [
           Expanded(
             child: GlassCard(
-              padding: const EdgeInsets.all(AppTheme.cardPadding),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacing3,
+                vertical: AppTheme.spacing2 + 2,
+              ),
               child: const Center(
                 child: SizedBox(
                   width: 20,
@@ -61,7 +64,10 @@ class GrowthSummaryCard extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: GlassCard(
-              padding: const EdgeInsets.all(AppTheme.cardPadding),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacing3,
+                vertical: AppTheme.spacing2 + 2,
+              ),
               child: const Center(
                 child: SizedBox(
                   width: 20,
@@ -86,7 +92,10 @@ class GrowthSummaryCard extends ConsumerWidget {
     required Color iconColor,
   }) {
     return GlassCard(
-      padding: const EdgeInsets.all(AppTheme.cardPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacing3,
+        vertical: AppTheme.spacing2 + 2,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -113,7 +122,7 @@ class GrowthSummaryCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,

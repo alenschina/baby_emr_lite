@@ -52,7 +52,7 @@ class TodayRemindersSection extends ConsumerWidget {
             // ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // 提醒列表
         medicationRemindersAsync.when(
@@ -126,8 +126,11 @@ class TodayRemindersSection extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(AppTheme.cardPadding),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacing3,
+          vertical: AppTheme.spacing2 + 2,
+        ),
         child: Row(
           children: [
             Container(
@@ -191,8 +194,11 @@ class TodayRemindersSection extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: GlassCard(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(AppTheme.cardPadding),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacing3,
+          vertical: AppTheme.spacing2 + 2,
+        ),
         child: Row(
           children: [
             Container(
@@ -250,7 +256,10 @@ class TodayRemindersSection extends ConsumerWidget {
   /// 空状态
   Widget _buildEmptyState() {
     return GlassCard(
-      padding: const EdgeInsets.all(AppTheme.cardPaddingXLarge),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.cardPadding,
+        vertical: AppTheme.spacing3 + 2,
+      ),
       child: Column(
         children: [
           Container(
@@ -266,7 +275,7 @@ class TodayRemindersSection extends ConsumerWidget {
               size: 24,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           const Text(
             '今日暂无待办事项',
             style: TextStyle(
