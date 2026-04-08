@@ -214,7 +214,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '我的健康',
+                    '身高体重',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
