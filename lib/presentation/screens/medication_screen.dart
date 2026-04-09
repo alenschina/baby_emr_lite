@@ -222,7 +222,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
               ),
             ),
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (err, st) => const SizedBox.shrink(),
           ),
         ],
       ),
@@ -473,7 +473,7 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
                     ),
                   ),
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (err, st) => const SizedBox.shrink(),
                 );
               }),
             ],
@@ -590,19 +590,17 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       ),
     );
 
-    if (confirmed == true && mounted) {
-      final ok = await ref
-          .read(medicationPlanNotifierProvider.notifier)
-          .endPlan(planId, DateTime.now());
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: AppTheme.snackBarDisplayDuration,
-            content: Text(ok ? '用药计划已结束' : '操作失败'),
-          ),
-        );
-      }
-    }
+    if (confirmed != true) return;
+    final ok = await ref
+        .read(medicationPlanNotifierProvider.notifier)
+        .endPlan(planId, DateTime.now());
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: AppTheme.snackBarDisplayDuration,
+        content: Text(ok ? '用药计划已结束' : '操作失败'),
+      ),
+    );
   }
 
   Future<void> _confirmDeletePlan(BuildContext context, String planId) async {
@@ -625,18 +623,16 @@ class _MedicationScreenState extends ConsumerState<MedicationScreen>
       ),
     );
 
-    if (confirmed == true && mounted) {
-      final success = await ref
-          .read(medicationPlanNotifierProvider.notifier)
-          .deletePlan(planId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: AppTheme.snackBarDisplayDuration,
-            content: Text(success ? '计划已删除' : '删除失败'),
-          ),
-        );
-      }
-    }
+    if (confirmed != true) return;
+    final success = await ref
+        .read(medicationPlanNotifierProvider.notifier)
+        .deletePlan(planId);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: AppTheme.snackBarDisplayDuration,
+        content: Text(success ? '计划已删除' : '删除失败'),
+      ),
+    );
   }
 }

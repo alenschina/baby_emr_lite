@@ -51,7 +51,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                         return _buildHealthCard(latest);
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (err, st) => const SizedBox.shrink(),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -67,7 +67,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                         return _GrowthTrendChart(records: records);
                       },
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (err, st) => const SizedBox.shrink(),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -180,7 +180,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
                   ),
                 ),
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (err, st) => const SizedBox.shrink(),
               ),
             ],
           ),
@@ -244,7 +244,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
               Expanded(
                 child: _buildMetricItem(
                   icon: Icons.height_rounded,
-                  value: '${latest.height.toStringAsFixed(1)}',
+                  value: latest.height.toStringAsFixed(1),
                   unit: 'cm',
                   label: '身高',
                   color: AppTheme.brandPrimary,
@@ -254,7 +254,7 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
               Expanded(
                 child: _buildMetricItem(
                   icon: Icons.monitor_weight_rounded,
-                  value: '${latest.weight.toStringAsFixed(1)}',
+                  value: latest.weight.toStringAsFixed(1),
                   unit: 'kg',
                   label: '体重',
                   color: AppTheme.success,
@@ -496,19 +496,17 @@ class _GrowthScreenState extends ConsumerState<GrowthScreen> {
       ),
     );
 
-    if (confirmed == true && mounted) {
-      final success = await ref
-          .read(growthDataNotifierProvider.notifier)
-          .delete(id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: AppTheme.snackBarDisplayDuration,
-            content: Text(success ? '记录已删除' : '删除失败'),
-          ),
-        );
-      }
-    }
+    if (confirmed != true) return;
+    final success = await ref
+        .read(growthDataNotifierProvider.notifier)
+        .delete(id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: AppTheme.snackBarDisplayDuration,
+        content: Text(success ? '记录已删除' : '删除失败'),
+      ),
+    );
   }
 }
 

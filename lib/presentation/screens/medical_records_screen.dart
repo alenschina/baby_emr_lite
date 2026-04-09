@@ -168,7 +168,7 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
                   ),
                 ),
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (err, st) => const SizedBox.shrink(),
               ),
             ],
           ),
@@ -457,19 +457,17 @@ class _MedicalRecordsScreenState extends ConsumerState<MedicalRecordsScreen> {
       ),
     );
 
-    if (confirmed == true && mounted) {
-      final success = await ref
-          .read(medicalRecordNotifierProvider.notifier)
-          .delete(id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: AppTheme.snackBarDisplayDuration,
-            content: Text(success ? '记录已删除' : '删除失败'),
-          ),
-        );
-      }
-    }
+    if (confirmed != true) return;
+    final success = await ref
+        .read(medicalRecordNotifierProvider.notifier)
+        .delete(id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: AppTheme.snackBarDisplayDuration,
+        content: Text(success ? '记录已删除' : '删除失败'),
+      ),
+    );
   }
 
   List<String> _getAvailableHospitals(List<MedicalRecord> records) {

@@ -76,7 +76,7 @@ class HomeScreen extends ConsumerWidget {
                                 color: AppTheme.brandPrimary,
                               ),
                             ),
-                            error: (_, __) => const SizedBox.shrink(),
+                            error: (err, st) => const SizedBox.shrink(),
                           ),
 
                           const SizedBox(height: 12),

@@ -20,6 +20,8 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
   /// 环形图区域边长（较初版缩小 15%，减轻与周边文案重叠）
   static const double _chartSize = 176.8;
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -111,13 +113,13 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.brandPrimary.withOpacity(0.22),
-                      AppTheme.brandPrimary.withOpacity(0.08),
+                      AppTheme.brandPrimary.withAlpha(_alpha(0.22)),
+                      AppTheme.brandPrimary.withAlpha(_alpha(0.08)),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AppTheme.brandPrimary.withOpacity(0.2),
+                    color: AppTheme.brandPrimary.withAlpha(_alpha(0.2)),
                   ),
                 ),
                 child: const Icon(
@@ -175,7 +177,7 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            AppTheme.brandPrimary.withOpacity(0.06),
+                            AppTheme.brandPrimary.withAlpha(_alpha(0.06)),
                             Colors.transparent,
                           ],
                           stops: const [0.35, 1.0],
@@ -258,7 +260,7 @@ class MedicationComplianceOverviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Divider(height: 1, color: AppTheme.slate200.withOpacity(0.65)),
+          Divider(height: 1, color: AppTheme.slate200.withAlpha(_alpha(0.65))),
           const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -353,9 +355,11 @@ class _TierBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: light.withOpacity(0.85),
+        color: light.withAlpha((0.85 * 255).round().clamp(0, 255)),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.28)),
+        border: Border.all(
+          color: color.withAlpha((0.28 * 255).round().clamp(0, 255)),
+        ),
       ),
       child: Text(
         label,
@@ -388,9 +392,11 @@ class _LegendChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha((0.1 * 255).round().clamp(0, 255)),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.22)),
+        border: Border.all(
+          color: color.withAlpha((0.22 * 255).round().clamp(0, 255)),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

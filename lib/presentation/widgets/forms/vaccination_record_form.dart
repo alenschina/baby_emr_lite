@@ -8,6 +8,9 @@ import '../../utils/baby_record_guard.dart';
 import '../card_outlined_action_button.dart';
 import '../glass_card.dart';
 
+int _alphaFromOpacity(double opacity) =>
+    (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 疫苗接种表单组件
 class VaccinationRecordForm extends ConsumerStatefulWidget {
   final VaccinationRecord? existingRecord;
@@ -190,7 +193,7 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.6),
+            fillColor: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: AppTheme.glassBorder),
@@ -266,7 +269,7 @@ class _VaccinationRecordFormState extends ConsumerState<VaccinationRecordForm> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.glassBorder),
             ),

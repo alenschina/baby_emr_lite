@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class GrowthSummaryCard extends ConsumerWidget {
   const GrowthSummaryCard({super.key});
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final latestAsync = ref.watch(latestGrowthDataProvider);
@@ -24,7 +26,8 @@ class GrowthSummaryCard extends ConsumerWidget {
                 label: '最新身高',
                 value: latest?.height.toStringAsFixed(1) ?? '--',
                 unit: 'cm',
-                iconBackgroundColor: const Color(0xFF3B82F6).withOpacity(0.1),
+                iconBackgroundColor:
+                    const Color(0xFF3B82F6).withAlpha(_alpha(0.1)),
                 iconColor: const Color(0xFF3B82F6),
               ),
             ),
@@ -37,7 +40,8 @@ class GrowthSummaryCard extends ConsumerWidget {
                 label: '最新体重',
                 value: latest?.weight.toStringAsFixed(1) ?? '--',
                 unit: 'kg',
-                iconBackgroundColor: const Color(0xFF10B981).withOpacity(0.1),
+                iconBackgroundColor:
+                    const Color(0xFF10B981).withAlpha(_alpha(0.1)),
                 iconColor: const Color(0xFF10B981),
               ),
             ),
@@ -79,7 +83,7 @@ class GrowthSummaryCard extends ConsumerWidget {
           ),
         ],
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, st) => const SizedBox.shrink(),
     );
   }
 

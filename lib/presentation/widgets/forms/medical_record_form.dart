@@ -7,6 +7,9 @@ import '../../providers/medical_record_providers.dart';
 import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
+int _alphaFromOpacity(double opacity) =>
+    (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 病例记录表单组件
 class MedicalRecordForm extends ConsumerStatefulWidget {
   final MedicalRecord? existingRecord;
@@ -206,7 +209,7 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.glassBorder),
             ),
@@ -260,7 +263,7 @@ class _MedicalRecordFormState extends ConsumerState<MedicalRecordForm> {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.6),
+            fillColor: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: AppTheme.glassBorder),
@@ -539,7 +542,7 @@ class MedicalRecordCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.brandPrimary.withOpacity(0.1),
+              color: AppTheme.brandPrimary.withAlpha(_alphaFromOpacity(0.1)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

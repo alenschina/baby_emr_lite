@@ -25,6 +25,8 @@ class MedicalRecordFilterPanel extends StatefulWidget {
 }
 
 class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   late int? selectedStartYear;
   late int? selectedEndYear;
   late String? selectedHospital;
@@ -122,7 +124,7 @@ class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.brandPrimary.withOpacity(0.05),
+              color: AppTheme.brandPrimary.withAlpha(_alpha(0.05)),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
@@ -433,7 +435,7 @@ class _MedicalRecordFilterPanelState extends State<MedicalRecordFilterPanel> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: value != null
-              ? AppTheme.brandPrimary.withOpacity(0.3)
+              ? AppTheme.brandPrimary.withAlpha(_alpha(0.3))
               : Colors.transparent,
           width: 1,
         ),

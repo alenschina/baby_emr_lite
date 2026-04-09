@@ -7,6 +7,9 @@ import '../../providers/growth_data_providers.dart';
 import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 
+int _alphaFromOpacity(double opacity) =>
+    (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 生长发育表单组件
 class GrowthDataForm extends ConsumerStatefulWidget {
   final GrowthData? existingRecord;
@@ -171,7 +174,7 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.glassBorder),
             ),
@@ -224,7 +227,7 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.6),
+            fillColor: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: AppTheme.glassBorder),
@@ -277,7 +280,7 @@ class _GrowthDataFormState extends ConsumerState<GrowthDataForm> {
             hintText: hint,
             suffixText: suffix,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.6),
+            fillColor: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: AppTheme.glassBorder),
@@ -507,7 +510,7 @@ class GrowthDataCard extends ConsumerWidget {
                 child: _buildDataCard(
                   icon: Icons.height_rounded,
                   label: '身高',
-                  value: '${record.height.toStringAsFixed(1)}',
+                  value: record.height.toStringAsFixed(1),
                   unit: 'cm',
                   diff: heightDiff,
                   color: AppTheme.brandPrimary,
@@ -519,7 +522,7 @@ class GrowthDataCard extends ConsumerWidget {
                 child: _buildDataCard(
                   icon: Icons.monitor_weight_rounded,
                   label: '体重',
-                  value: '${record.weight.toStringAsFixed(1)}',
+                  value: record.weight.toStringAsFixed(1),
                   unit: 'kg',
                   diff: weightDiff,
                   color: AppTheme.success,
@@ -534,7 +537,7 @@ class GrowthDataCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.slate50.withOpacity(0.5),
+                color: AppTheme.slate50.withAlpha(_alphaFromOpacity(0.5)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -575,9 +578,9 @@ class GrowthDataCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(_alphaFromOpacity(0.1)),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withAlpha(_alphaFromOpacity(0.2))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,7 +720,7 @@ class GrowthStatsCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(_alphaFromOpacity(0.1)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 22),

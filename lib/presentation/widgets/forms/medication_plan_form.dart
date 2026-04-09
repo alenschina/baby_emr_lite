@@ -14,6 +14,9 @@ import '../../utils/baby_record_guard.dart';
 import '../glass_card.dart';
 import 'medication_plan_card.dart';
 
+int _alphaFromOpacity(double opacity) =>
+    (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 方案 C：用药计划表单（频率 / 多时间点 / 剂量 / 周期）
 class MedicationPlanForm extends ConsumerStatefulWidget {
   final MedicationPlanAggregate? existingAggregate;
@@ -194,7 +197,8 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<MedicationFrequencyType>(
-                value: _freqType,
+                key: ValueKey(_freqType),
+                initialValue: _freqType,
                 decoration: _fieldDecoration(),
                 items: MedicationFrequencyType.values
                     .map(
@@ -263,7 +267,7 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppTheme.glassBorder),
                           ),
@@ -400,7 +404,7 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
   InputDecoration _fieldDecoration() {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white.withOpacity(0.6),
+      fillColor: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: AppTheme.glassBorder),
@@ -501,7 +505,7 @@ class _MedicationPlanFormState extends ConsumerState<MedicationPlanForm> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withAlpha(_alphaFromOpacity(0.6)),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.glassBorder),
             ),

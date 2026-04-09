@@ -13,6 +13,8 @@ import 'glass_card.dart';
 class TodayRemindersSection extends ConsumerWidget {
   const TodayRemindersSection({super.key});
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final medicationRemindersAsync = ref.watch(
@@ -102,7 +104,7 @@ class TodayRemindersSection extends ConsumerWidget {
                   color: AppTheme.brandPrimary,
                 ),
               ),
-              error: (_, __) => _buildEmptyState(),
+              error: (err, st) => _buildEmptyState(),
             );
           },
           loading: () => const Center(
@@ -111,7 +113,7 @@ class TodayRemindersSection extends ConsumerWidget {
               color: AppTheme.brandPrimary,
             ),
           ),
-          error: (_, __) => _buildEmptyState(),
+          error: (err, st) => _buildEmptyState(),
         ),
       ],
     );
@@ -137,7 +139,7 @@ class TodayRemindersSection extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.brandPrimary.withOpacity(0.1),
+                color: AppTheme.brandPrimary.withAlpha(_alpha(0.1)),
                 borderRadius: BorderRadius.circular(
                   AppTheme.radiusIconContainer,
                 ),
@@ -205,7 +207,7 @@ class TodayRemindersSection extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.warning.withOpacity(0.1),
+                color: AppTheme.warning.withAlpha(_alpha(0.1)),
                 borderRadius: BorderRadius.circular(
                   AppTheme.radiusIconContainer,
                 ),
@@ -266,7 +268,7 @@ class TodayRemindersSection extends ConsumerWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppTheme.success.withOpacity(0.1),
+              color: AppTheme.success.withAlpha(_alpha(0.1)),
               borderRadius: BorderRadius.circular(AppTheme.radiusIconContainer),
             ),
             child: Icon(

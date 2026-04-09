@@ -18,6 +18,8 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
     this.filterPlanName,
   });
 
+  int _alpha(double opacity) => (opacity * 255).round().clamp(0, 255).toInt();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(todayMedicationCheckinItemsProvider);
@@ -98,7 +100,7 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppTheme.success.withOpacity(0.1),
+              color: AppTheme.success.withAlpha(_alpha(0.1)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -133,7 +135,7 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppTheme.error.withOpacity(0.1),
+              color: AppTheme.error.withAlpha(_alpha(0.1)),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -318,8 +320,8 @@ class MedicationTodayCheckinSheet extends ConsumerWidget {
         fontWeight: FontWeight.w600,
       ),
       selectedColor: color,
-      backgroundColor: color.withOpacity(0.08),
-      side: BorderSide(color: color.withOpacity(0.35)),
+      backgroundColor: color.withAlpha(_alpha(0.08)),
+      side: BorderSide(color: color.withAlpha(_alpha(0.35))),
       showCheckmark: false,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

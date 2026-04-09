@@ -20,6 +20,9 @@ String medicationFrequencyDisplay(MedicationFrequency f) {
   };
 }
 
+int _alphaFromOpacity(double opacity) =>
+    (opacity * 255).round().clamp(0, 255).toInt();
+
 /// 方案 C：用药计划卡片（列表展示）
 class MedicationPlanCard extends ConsumerWidget {
   final MedicationPlanAggregate aggregate;
@@ -141,7 +144,7 @@ class MedicationPlanCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.slate50.withOpacity(0.5),
+                color: AppTheme.slate50.withAlpha(_alphaFromOpacity(0.5)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -207,7 +210,7 @@ class MedicationPlanCard extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (err, st) => const SizedBox.shrink(),
             ),
           if (isActive && onOpenTodayCheckin != null) ...[
             const SizedBox(height: 12),
@@ -246,7 +249,7 @@ class MedicationPlanCard extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (err, st) => const SizedBox.shrink(),
             ),
           ],
           const SizedBox(height: 12),
@@ -291,7 +294,7 @@ class MedicationPlanCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.brandPrimary.withOpacity(0.1),
+        color: AppTheme.brandPrimary.withAlpha(_alphaFromOpacity(0.1)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
